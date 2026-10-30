@@ -1,0 +1,21 @@
+# Caches de ferramentas de análise usadas nas demos (ruff, mypy, pytest)
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# Ambientes virtuais
+.venv/
+venv/
+
+# Arquivos de rascunho/scratch (diffs e mensagens de commit em preparação)
+*.diff
+*.txt
+
+# Arquivos de editor/sistema
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
