@@ -56,7 +56,7 @@ Todos os tipos são importantes e se sobrepõem, e bugs podem ser mais ou menos 
 
 Para cada tipo de bug desses, há técnicas e ferramentas mais adequadas para encontrá-lo.
 
-## Técnicas e ferramentas
+## Como encontramos bugs
 
 Vamos ver quatro abordagens.
 
@@ -92,13 +92,11 @@ O Uai que eu vejo é que falta um `return` ao final do bloco do `else`: o códig
 
 É chamada análise estática porque examina o código sem executá-lo. Utiliza ferramentas que procuram padrões de código que indicam possíveis bugs, tentando identificar trechos do código que correspondem a regras pré-definidas. Estas regras em geral são configuráveis e muitas vezes podem ser acrescidas de regras personalizadas pela pessoa usuária.
 
-Acredito que seja a técnica com mais ferramentas disponíveis. Exemplos bem conhecidos são linters como ruff e pylint e os checadores de tipagem, como mypy e pyright. Temos outros, por exemplo o bandit, que é um linter para encontrar vulnerabilidades em código Python.
-
-Essas ferramentas mais comuns encontram variáveis não definidas, problemas de estilo, tipos incorretos e fluxos incompletos, mas cada ferramenta trabalha com uma abstração e uma profundidade diferentes.
+Exemplos bem conhecidos são linters como ruff e pylint e os checadores de tipagem, como mypy e pyright.
 
 Vamos dar uma rápida olhada em como uma dessas ferramentas é utilizada, o ruff. Ele é rápido e eficiente, e pode ser configurado para encontrar problemas específicos. Por exemplo, ele não encontra o nosso UAI do código anterior nas configurações padrão.
 
-Mas, se ativamos as regras de fluxo de retorno, o grupo RET, ele encontra o UAI na hora, apontando que falta um `return` explícito no fim de uma função que pode retornar valores.
+Se ativamos as regras de fluxo de retorno, o grupo RET, ele encontra o UAI na hora, apontando que falta um `return` explícito no fim de uma função que pode retornar valores. Mas percebam que ele não sabe o quê deveria ser retornado, apenas que faltou um return.
 
 É uma técnica capaz de lidar com grandes quantidades de código rapidamente, mas tende a gerar falsos positivos.
 
@@ -208,6 +206,31 @@ Não precisa entender esse código inteiro. Olhem só para isto: durante o `__eq
 
 Você corrige um bug numa função e esquece outra função parecida. Lembram quando eu falei nisso? Acontece de verdade.
 
+
+#### Quebrando implementações do Python (cerca 8 min, 4 bugs?)
+
+| # | Bug | Alvo | Tipo | Origem | Situação | Risco de demo |
+|---|---|---|---|---|---|---|
+| 1 | **CPY-0055** — `pickle.dumps` de 9 linhas segfalta; a correção existia, foi *revertida* para tirar um teste caro e a entrada do changelog foi apagada | CPython (GIL comum) | segfault | IA (git-history-analyzer) | reportado gh-146452 (fechado com os defeitos vivos) | baixo |
+| 2 | **PYPY-FUZZ-016** — `next(z); list(z)` num `zip_longest` segfalta no PyPy; o `for` passa ileso | PyPy 7.3.23 | segfault | fusil (1745 linhas → 3) | reproduced 12/12; não reportado | baixo (PyPy ≤ 7.3.23) |
+| 3 | **RUSTPY-0007a + CPY-0002** — `L = []; L.append(L); list[L].__parameters__` derruba RustPython **e** CPython | dois interpretadores | segfault (recursão) | fusil + IA, independentes | CPython corrigido e backportado (gh-154275); RustPython aberto (#2796) | médio: CPython atualizado já levanta `RecursionError` — mostrar antes/depois |
+| 4 | **RUSTPY-0010** — `binascii.b2a_qp(b'\n')`: "the len is 8 but the index is 18446744073709551615" | RustPython 0.5.0 | pânico Rust (underflow) | fusil | confirmed; não reportado | baixo |
+
+Por que estes quatro: três interpretadores, três origens (IA, fuzzing, ambos), quatro mecanismos
+diferentes (ponteiro nulo após mutação, invariante copiado por copy-paste, recursão sem guarda,
+underflow de inteiro sem sinal), e dois ganchos de história fortes (revert; crash compartilhado).
+O item 4 é o alívio cômico — a mensagem de erro é a piada.
+
+**Reservas, em ordem:**
+- **CPY-0261** — `del ctx.keylog_filename` derruba o SSL desde a 3.9 (uma linha, qualquer build, não reportado). Troca direta pelo item 1 se quiser algo mais cotidiano que `__reduce__`.
+- **OOM-0001** — `warnings.warn("boom")` sem memória segfalta em 4 linhas (reportado #151673). Único representante do modo OOM; exige build debug por causa de `_testcapi`. A frase honesta do slide: "pedi que a próxima alocação falhasse; em vez de MemoryError, segfault".
+- **TSAN-0053** — duas threads esgotam o mesmo iterador de dict e o dict é liberado duas vezes (reportado #154130; a issue anterior tinha sido fechada como "benigna"). Único representante de free-threading; exige `PYTHON_GIL=0`, intermitente mas ~8/8.
+- **CPY-0045/0046** — `struct` reinicializado com formato vazio: `list(it)` dá SIGFPE e `tuple(it)` entra em loop infinito. "Um bug, dois crashes".
+- **RUSTPY-0002** — `pwd.struct_passwd().pw_name`, uma linha, pânico; encontrado 100+ vezes em seis frotas.
+- **PYPY-FUZZ-015** — duas threads em `for line in f` segfaltam; reportado e **corrigido em 24h** (pypy#5575). Melhor uso: seção 7, como exemplo de ciclo completo.
+
+
+
 ## Crashando extensões
 
 Às vezes você escreve Python, chama uma função aparentemente normal e inocente de uma biblioteca e, de repente, o processo inteiro cai. Como isso acontece?
@@ -223,7 +246,23 @@ Um caminho comum para esses erros é:
 
 #### Exemplos de crashes em extensões
 
+##### Quebrando extensões (5 min, 2–3 bugs)
 
+| # | Bug | Alvo | Tipo | Origem | Situação | Risco de demo |
+|---|---|---|---|---|---|---|
+| 1 | **CX-MULTIDICT-0002** — `MultiDict().add(key="k")` segfalta; a versão em Python puro dá `TypeError` | multidict (C; base do aiohttp) | segfault | IA (parity-checker) | PR #1376 aberto a pedido do mantenedor | baixo (versão ≤ 6.7.2.dev0) |
+| 2 | **CRYPTOGRAPHY-0001 / RX-CRYPTOGRAPHY-0001** — `padding.PKCS7(0).padder().finalize()`: zero passa pela validação e o Rust divide por zero | cryptography (Rust/PyO3) | pânico Rust | fusil **e** IA, independentes | confirmed; não reportado | baixo (checar release atual) |
+| 3 | **PYDANTIC-0004 / RX-PYDANTIC_CORE-0023** — `TzInfo(-1e18)`: o `abs()` que ia devolver `ValueError` entra em pânico antes | pydantic-core (Rust) | pânico Rust (overflow) | fusil + IA | confirmed; não reportado | baixo |
+
+O item 2 tem um detalhe delicioso para plateia mista: a extensão é Rust, mas **o bug está no
+validador em Python** — `0 <= block_size` em vez de `0 <`. Um off-by-one em Python derruba o
+código "seguro". O item 3 é "a checagem que ia rejeitar o valor é a que quebra". Se só couberem
+dois, fique com 1 e 2 (C + Rust, IA + fuzzing).
+
+**Reservas:** **CX-MULTIDICT-0001** (`d.extend(d)` use-after-free; PR #1379) — ótimo "Uai", mas só
+crasha visivelmente em build debug/ASan. **TOKENIZERS-0001** (`BPEDecoder().decode([])`,
+`0usize - 1`) — só em build com overflow-checks; o release "funciona por coincidência", o que é
+uma história honesta e interessante, mas não é demo.
 
 ## Encontrando bugs em Python puro
 
@@ -235,11 +274,53 @@ Com o code-review-toolkit, encontramos diversos tipos de bugs, desde problemas s
 #### Problemas encontrados em pacotes conhecidos
 #### Problemas encontrados no pavedb, scanapi e brutils, pacotes sugeridos pelos mantenedores
 
+Quebrando código Python puro (7 min, 3–4 bugs)
+
+| # | Bug | Alvo | Tipo | Origem | Situação | Risco de demo |
+|---|---|---|---|---|---|---|
+| 1 | **CRF-COVPY-0007** — `--fail-under=99.9` passa num relatório que imprime 99% | coverage.py | resultado errado (gate de CI) | IA (silent-failure-hunter) | reproduced; #1168 "corrigiu" só o caso 100 | baixo: 3 linhas puras |
+| 2 | **CRF-PYREPL-0014** — Ctrl-C no REPL novo grava no histórico a linha que você cancelou | CPython 3.13+ `_pyrepl` | resultado errado (privacidade) | IA (parity-check vs GNU readline) | reproduced; não reportado | médio: precisa de terminal real (gif/vídeo) |
+| 3 | **CRF-IDLELIB-0035** — Format Paragraph do IDLE come uma letra de cada linha de código | idlelib | corrupção silenciosa de fonte | IA | reportado #154760 l.35 | baixo: `reformat_comment` é função pura |
+| 4 | **CRF-IDLELIB-0027** — `if sellast[-1] != '0'`: copiar-com-prompts perde a última linha nas colunas 10, 20, 100… | idlelib | resultado errado | IA | reportado #154760 l.27 | o "Uai" está na linha; a prova precisa de Tk |
+
+Quatro vítimas diferentes (CI, histórico, editor, clipboard), três ferramentas que a plateia usa, e
+nenhum crash — é aqui que a tese "crash é o bug bonzinho" fecha. O item 1 tem a frase pronta:
+"duas funções no mesmo arquivo, duas direções de arredondamento". O item 2 tem o contraste
+"o readline em C acerta há décadas; a reescrita em Python trocou o significado de `finish`".
+
+**Reservas:** **CRF-COVPY-0071** (com `--ignore-errors`, apagar um arquivo *sobe* a cobertura de 69%
+para 86%) — a opção "ignorar erros" premia o erro; exige mini-projeto. **CRF-PYREPL-0013** (histórico
+latin-1 destruído na primeira saída: leitura com `errors='replace'`, escrita UTF-8 estrita).
+**CRF-COVPY-0066** (`\n` num `omit` trava o coverage para sempre; o `# pragma: always breaks` que
+escondeu o caminho da própria cobertura).
+
+Considerar substituir alguns casos por exemplos dos projetos analisados a pedido das pessoas mantenedoras.
+
+## Lições importantes
+
+Considerar incluir essa seção, aproveitando as ideias abaixo.
+
+Dois fios atravessam os dez catálogos e podem dar unidade à palestra:
+
+1. **"Crash é o bug bonzinho: ele avisa."** As seções seguem do mais espetacular (segfault no
+   interpretador) ao mais perigoso (código Python que produz o resultado errado em silêncio). O
+   próprio INDEX do coverage.py diz que ali o pior bug é "número de cobertura errado que parece
+   certo". A ordem implementações → extensões → Python puro já conta essa história; basta nomeá-la.
+
+2. **"O bug ao lado do bug corrigido."** Uma proporção enorme dos melhores candidatos é a
+   *função irmã* que o fix esqueceu, a correção revertida, o remendo pontual que não foi à raiz:
+   CPY-0055 (fix revertido), CX-MULTIDICT-0002 (remendo em `setdefault`, `add` ficou), PKCS7(0)
+   ("perna esquecida" de uma varredura), CRF-COVPY-0007 (#1168 só corrigiu o caso 100),
+   RUSTPY-0007a/CPY-0002 (a irmã `_Py_subs_parameters` segue sem guarda), TSAN-0060 (`__defaults__`
+   ficou fora do PR). É a continuação natural do `groupby`/`_grouper_next` da Python Brasil, e
+   justifica sozinha o "como encontramos bugs" com IA (agentes de histórico de git).
+
+
 ## Do achado à contribuição: reportando responsavelmente
 
-Essas ferramentas de fuzzing e IA que discutimos não são teóricas, com aplicação potencial: foram utilizadas em algumas campanhas voltadas ao ecossistema Python e trouxeram resultados significativos.
+Vocês viram alguns bugs encontrados com ferramentas diferentes. Mas existe uma parte importante dessa história que ainda não mostramos.
 
-Mas encontrar um código suspeito é só o começo. Para isso virar uma contribuição, há todo um outro caminho.
+Como um código suspeito se transforma numa correção incorporada ao projeto? Resumidamente, funciona assim.
 
 Além de encontrar um possível bug, o que chamamos de achado, temos que produzir um script que reproduza esse bug, o que chamamos de reproducer.
 
@@ -247,21 +328,42 @@ Quando temos o reproducer, precisamos checar se aquele já é um problema conhec
 
 Com a confirmação de que é um bug desconhecido, precisamos entrar em contato com as pessoas mantenedoras e validar o bug, até mesmo para saber se elas têm interesse em corrigi-lo. 
 
+Temos que pensar no custo-benefício do nosso trabalho para a pessoa mantenedora, é algo delicado. Um relatório com 50 achados pode significar 50 horas de trabalho para alguém que não pediu por ele e até mesmo que não considera esses bugs relevantes. 
+
+A última coisa que você quer é descarregar uma avalanche de achados sobre uma pessoa mantenedora que provavelmente já está sobrecarregada com tarefas relativas ao seu projeto.
+
 ```slide
 Respeito às pessoas mantenedoras!
 
 encontrar → reproduzir → deduplicar → comunicar e validar → corrigir
 ```
 
-Esse contato com pessoas mantenedoras é algo importante e delicado. Temos que pensar no custo-benefício do nosso trabalho. Um relatório com 50 achados pode significar 50 horas de trabalho para alguém que não pediu por ele e até mesmo que não considera esses bugs relevantes. E se boa parte desses achados forem falsos positivos, a situação fica ainda pior.
-
-A última coisa que você quer é descarregar uma avalanche de achados sobre uma pessoa mantenedora que provavelmente já está sobrecarregada com tarefas relativas ao seu projeto.
-
 Daria para fazer uma palestra inteira só sobre essa parte humana do processo.
 
-## Convite
+Considerar usar algo do material abaixo se fizer sentido:
 
-Se você mantém um projeto Python, usa um projeto no qual gostaria de contribuir ou simplesmente tem curiosidade sobre se as ferramentas conseguem achar bugs em um projeto específico, por favor sugira-o como ~~uma vítima~~ um alvo para análise. Podemos trabalhar juntos nisso depois da palestra.
+Anedotas com fonte nos catálogos, sem precisar de slide de código:
+
+- **Corrigido seis dias antes de ser achado** (CRASH-0001): a frota rodava um build de 18/07; o PR entrou em 24/07. Lição gravada: "rebuild the matrix before a campaign".
+- **35 gists → 31 bugs**: na guarda-chuva #151763, o `rr` provou que quatro "bugs" eram faces do mesmo (OOM-0036, o bug camaleão com 8 caras).
+- **Falso bug por culpa do harness**: uma família inteira de "corrupção de heap" era artefato do próprio fusil trocando alocador com threads vivas. "Verificar antes de afirmar."
+- **Issue fechada errado** (#148873 → #154130): classificada como corrida "benigna"; o catálogo trouxe o crash e reabriu como outra issue.
+- **Mantenedores dizendo não** (#150505, TSAN-0057 `wont-file`) e **mantenedores pedindo PR em vez de issue** (multidict).
+- **"É duplicação dos unittests do CPython?"** (RustPython #8325): só 2 de 9 seriam pegos pela suíte.
+- **PyPy corrigido em 24h** com a explicação da issue *errada* — o mantenedor consertou no lugar certo mesmo assim (PYPY-FUZZ-015).
+- **NumPy e a recompensa** (fonte: reported-bugs-catalog).
+
+## Conclusão e Convite
+
+Hoje vimos que bugs podem estar no código que escrevemos, nas bibliotecas que utilizamos e até no próprio interpretador Python.
+
+Também vimos que encontrá-los pode exigir técnicas muito diferentes. Às vezes basta olhar para o código e pensar ‘Uai!’. Outras vezes precisamos de milhões de execuções ou de agentes de IA especializados.
+
+Mas o mais importante não é simplesmente encontrar bugs. É conseguir transformar essas descobertas em contribuições que tornem os projetos melhores.
+
+Se vocês quiserem participar dessa caça, me procurem depois da palestra. Podemos procurar bugs no código de vocês também.
+
+----
 
 ## Anexo: Posts
 
