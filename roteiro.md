@@ -22,7 +22,7 @@ Vamos explicar como se encontram bugs em código Python, em extensões e nas imp
 ```
 ## Introdução
 
-Boa tarde!
+Boa tarde! Esta é a palestra "Quebrando o seu código e o Python".
 
 Meu nome é Daniel, sou pai, biólogo, programador amador e caçador de bugs.
 
@@ -40,9 +40,11 @@ Por exemplo, olhem este código:
 ```python
 super.__new__(super).__get__(1)
 ```
-Se você executá-lo num Python 3.13 ou mais recente, isso vai imediatamente causar um erro de segmentação. O que isso significa? A execução é interrompida anormalmente, ou seja o interpretador cai, ou seja para de funcionar, ou seja sofre um crash, ou seja bate as botas.
+Se você executá-lo num Python 3.13 ou mais recente, isso vai imediatamente causar um erro de segmentação. O que isso significa? A execução é interrompida anormalmente, ou seja o interpretador para de funcionar, ou seja sofre um crash, ou seja bate as botas.
 
-Quem tiver um espírito aventureiro, pode abrir um prompt de comando do Python e digitar esse código, para ver de perto como é quebrar o interpretador. Não faça isso numa sessão já existente, importante pra você.
+Quem tiver um espírito aventureiro pode abrir um prompt de comando do Python e digitar esse código, daí me conte o que acontece. Mas não faça isso numa sessão já existente, importante pra você.
+
+Esse código em especial não é muito preocupante porque é extremamente artificial, a gente não vai esbarrar nesse crash num programa normal. Mas muitos outros exemplos podem acontecer e acontecem em código bem comportado, artesanal, em produção. Inclusive em código com impacto na segurança ou na estabilidade do sistema.
 
 ## Tipos de bug
 
@@ -112,7 +114,7 @@ O feedback mostra quais dessas tentativas parecem interessantes, por exemplo, po
 
 fusil e lafleur são fuzzers mais especializados, focados no Python, que eu desenvolvo e usei em campanhas voltadas para implementações e extensões.
 
-É uma técnica que escala bem, encontra bugs profundos e evita falsos positivos. Mas requer bastante recursos como tempo de CPU. E tende a gerar scripts enormes, já vi programa de 25 mil linhas de Python. Quando minimizado, sobraram nove linhas que reproduziam o bug.
+É uma técnica que escala bem, consegue encontrar bugs profundos e frequentemente produz evidências executáveis, como crashes ou comportamentos inesperados reproduzíveis. 
 
 ### A mistura das anteriores: análise baseada em IA
 
@@ -130,7 +132,7 @@ Por exemplo, examinar o histórico de correções de um projeto e procurar lugar
 Mesmo bug não foi corrigido em código semelhante.
 ```
 
-A família que de ferramentas de IA que desenvolvi foca em análise global de projetos, cada ferramenta com uma especialização adicional: análise de Python, do próprio CPython, de outras implementações, de extensões.
+A família de ferramentas de IA que desenvolvi foca em análise sistemática de bases de código, cada ferramenta com uma especialização adicional: análise de Python, do próprio CPython, de outras implementações, de extensões.
 
 E essa família já começou a crescer com a colaboração de outras pessoas. Bhuvansh Kataria desenvolveu uma ferramenta para analisar o PyPy, e Charlie Lin, outra voltada a extensões Python em Rust.
 
@@ -142,15 +144,30 @@ E essa família já começou a crescer com a colaboração de outras pessoas. Bh
 - pypy-review-toolkit: PyPy, criado por Bhuvansh Kataria.
 - rust-ext-review-toolkit: extensões em Rust, criado por Charlie Lin.
 ```
+
+## Desvendando um crash
+
+Deixa eu mostrar como a gente descobre o que deu errado quando ocorre um crash. Sabe quando ocorre uma exceção no nosso código Python e aparece a mensagem de erro, mostrando a linha com o problema e a sequência de linhas que levou até o problema? Aquilo é um traceback do código Python.
+
+```
+Slide com um traceback da chamada do super.__new__ em versão antiga.
+```
+
+Com um crash, podemos usar um debugger como o GDB e fazer a interrupção anormal da execução acontecer sob observação. Isso vai nos dar a linha onde o problema ocorreu e a sequência de linhas que levou até o problema. Isso é um backtrace do código nativo.
+
+```
+Slide com o backtrace do crash do super.__new__ em versão recente.
+```
+
+Também existem ferramentas específicas para esclarecer outros aspectos de um crash, como o AddressSanitizer que analisa o estado da memória de um programa, ou o faulthandler do CPython, que nos dá um backtrace simplificado sem precisar de um debugger.
+
 ## Crashando o Python
 
 O Python é uma linguagem de programação que tem várias implementações, ou seja, vários softwares capazes de entender e rodar a linguagem Python, como o CPython, o PyPy e o RustPython.
 
-Quando falamos do Python ou do interpretador Python, quase sempre estamos falando do CPython, principal implementação. O CPython é um software com o cerne escrito na linguagem C, além de muito Python na biblioteca. E esse software, essa implementação, tem vários bugs conhecidos ou não. Ao contrário dos erros que ocorrem em código Python, que resultam em exceções, problemas no código C do CPython pode causar falhas de segmentação ou aborts, dois jeitos diferentes de um programa crashar.
+Quando falamos do Python ou do interpretador Python, quase sempre estamos falando do CPython, principal implementação. O CPython é um software com o cerne escrito na linguagem C, além de muito Python puro na biblioteca. E esse software, essa implementação, tem vários bugs conhecidos ou não. Ao contrário dos erros que ocorrem em código Python, que resultam em exceções, problemas no código C do CPython pode causar falhas de segmentação ou aborts, dois jeitos diferentes de um programa crashar.
 
-Vamos ver rapidamente um exemplo de código capaz de fazer o CPython crashar: `super.__new__(super).__get__(super)`. Se você tem um espírito aventureiro, digite esse código num interpretador de Python e me diga o que acontece.
-
-Pois é, é uma situação indesejada, rara, mas que acontece muito. Esse código em especial não é muito preocupante porque é extremamente artificial, a gente não vai esbarrar nesse crash num programa normal. Mas muitos outros exemplos podem acontecer e acontecem em código bem comportado, artesanal, em produção. Inclusive em código com impacto em segurança ou estabilidade do sistema.
+Pois é, é uma situação indesejad e rara, mas que acontece muito. 
 
 Para evitar que esses problemas ocorram em produção, no pior momento, tentamos procurar os bugs preventivamente. Nas minhas campanhas, uso principalmente fuzzing e IA. O fusil é capaz de encontrar crashes em várias implementações de Python, enquanto o lafleur apenas no JIT do CPython. E temos toolkits que focam em implementações específicas: CPython, PyPy e RustPython.
 
@@ -158,6 +175,7 @@ Para evitar que esses problemas ocorram em produção, no pior momento, tentamos
 
 
 ##### `__iter__`
+
 Então vamos sair da teoria. Este foi um programa produzido a partir de uma campanha do fusil em cima do CPython.
 
 ```python
@@ -174,6 +192,7 @@ next(generator())  # deveria propagar RuntimeError; ocorria crash
 Esse código é estranho? É. Mas tem alguma coisa inválida aqui? Não. O `__iter__` é perfeitamente autorizado a levantar uma exceção. O que deveria acontecer? `RuntimeError`. O que aconteceu? **Crash**.
 
 ##### `_grouper_next`
+
 Vamos ver um exemplo do tipo de erro que uma dessas ferramentas de IA encontra:
 
 O alvo da análise era o código por trás do `groupby`, uma ferramenta do módulo `itertools` do Python. Uma correção anterior protegeu referências em `groupby_next` antes de chamar código Python reentrante, por exemplo um dunder eq que avança o iterador.
@@ -270,7 +289,7 @@ As minhas ferramentas de fuzzing não são boas para encontrar problemas em Pyth
 
 Com o code-review-toolkit, encontramos diversos tipos de bugs, desde problemas sutis de lógica até erros de fluxo de execução desastrosos, passando por esgotamento de recursos e falhas de segurança.
 
-#### Problemas encontrados na sdtlib
+#### Problemas encontrados na stdlib
 #### Problemas encontrados em pacotes conhecidos
 #### Problemas encontrados no pavedb, scanapi e brutils, pacotes sugeridos pelos mantenedores
 
@@ -296,25 +315,16 @@ escondeu o caminho da própria cobertura).
 
 Considerar substituir alguns casos por exemplos dos projetos analisados a pedido das pessoas mantenedoras.
 
+Lembram que eu falei que gosto de crashes? Pois é. Nesse caso, o programa não caiu. Ele continuou funcionando e informou um resultado errado.
+E isso pode ser muito mais difícil de perceber.
+
 ## Lições importantes
 
-Considerar incluir essa seção, aproveitando as ideias abaixo.
+Dois fios atravessam os exemplos de bug que vimos.
 
-Dois fios atravessam os dez catálogos e podem dar unidade à palestra:
+1. **Crash é o bug bonzinho: ele avisa.** Não significa que um crash não possa ser um problema sério, inclusive de segurança, mas o fato de o programa parar de rodar dá um sinal claro de que existe um problema. Com o resultado errado silencioso, o problema pode permanecer oculto, causando prejuízos.
 
-1. **"Crash é o bug bonzinho: ele avisa."** As seções seguem do mais espetacular (segfault no
-   interpretador) ao mais perigoso (código Python que produz o resultado errado em silêncio). O
-   próprio INDEX do coverage.py diz que ali o pior bug é "número de cobertura errado que parece
-   certo". A ordem implementações → extensões → Python puro já conta essa história; basta nomeá-la.
-
-2. **"O bug ao lado do bug corrigido."** Uma proporção enorme dos melhores candidatos é a
-   *função irmã* que o fix esqueceu, a correção revertida, o remendo pontual que não foi à raiz:
-   CPY-0055 (fix revertido), CX-MULTIDICT-0002 (remendo em `setdefault`, `add` ficou), PKCS7(0)
-   ("perna esquecida" de uma varredura), CRF-COVPY-0007 (#1168 só corrigiu o caso 100),
-   RUSTPY-0007a/CPY-0002 (a irmã `_Py_subs_parameters` segue sem guarda), TSAN-0060 (`__defaults__`
-   ficou fora do PR). É a continuação natural do `groupby`/`_grouper_next` da Python Brasil, e
-   justifica sozinha o "como encontramos bugs" com IA (agentes de histórico de git).
-
+2. **O bug ao lado do bug corrigido.** Uma grande proporção dos bugs que encontro são casos onde o fix esqueceu de corrigir a *função irmã*, justificando a análise cuidadosa de histórico correções no git.
 
 ## Do achado à contribuição: reportando responsavelmente
 
@@ -328,7 +338,11 @@ Quando temos o reproducer, precisamos checar se aquele já é um problema conhec
 
 Com a confirmação de que é um bug desconhecido, precisamos entrar em contato com as pessoas mantenedoras e validar o bug, até mesmo para saber se elas têm interesse em corrigi-lo. 
 
-Temos que pensar no custo-benefício do nosso trabalho para a pessoa mantenedora, é algo delicado. Um relatório com 50 achados pode significar 50 horas de trabalho para alguém que não pediu por ele e até mesmo que não considera esses bugs relevantes. 
+E até agora mostrei vários bugs encontrados pelas ferramentas. Mas nem tudo o que parece um bug realmente é um bug.
+
+Numa das campanhas, encontramos o que parecia ser uma família de corrupções de memória. Depois de investigar, descobrimos que o problema estava na própria ferramenta de teste.
+
+Então temos que pensar no custo-benefício do nosso trabalho para a pessoa mantenedora, é algo delicado. Um relatório com 50 achados pode significar 50 horas de trabalho para alguém que não pediu por ele e até mesmo que não considera esses bugs relevantes. 
 
 A última coisa que você quer é descarregar uma avalanche de achados sobre uma pessoa mantenedora que provavelmente já está sobrecarregada com tarefas relativas ao seu projeto.
 
@@ -357,11 +371,19 @@ Anedotas com fonte nos catálogos, sem precisar de slide de código:
 
 Hoje vimos que bugs podem estar no código que escrevemos, nas bibliotecas que utilizamos e até no próprio interpretador Python.
 
-Também vimos que encontrá-los pode exigir técnicas muito diferentes. Às vezes basta olhar para o código e pensar ‘Uai!’. Outras vezes precisamos de milhões de execuções ou de agentes de IA especializados.
+Também vimos que encontrá-los pode exigir técnicas muito diferentes. Às vezes basta olhar para o código e pensar ‘Uai!’. Outras vezes precisamos de milhões de execuções ou de agentes de IA especializados. 
 
-Mas o mais importante não é simplesmente encontrar bugs. É conseguir transformar essas descobertas em contribuições que tornem os projetos melhores.
+Discutimos como corrigir um bug não garante que você eliminou todas as suas variantes, e que o bug nem sempre está onde o sintoma aparece.
+
+Mas o mais importante não é simplesmente encontrar bugs. É conseguir transformar essas descobertas em contribuições que melhorem os projetos analisados.
 
 Se vocês quiserem participar dessa caça, me procurem depois da palestra. Podemos procurar bugs no código de vocês também.
+
+## Contato e agradecimento
+
+Esses são os meus contatos.
+
+Muito obrigado!
 
 ----
 
