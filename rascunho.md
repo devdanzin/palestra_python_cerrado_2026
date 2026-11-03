@@ -1,4 +1,4 @@
-# [Quebrando o seu código e o Python](https://pythoncerrado.org/2026/grade/20261107/quebrando-o-seu-codigo-e-o-python-JZP83A)
+# [Quebrando o seu código e o Python - Rascunho](https://pythoncerrado.org/2026/grade/20261107/quebrando-o-seu-codigo-e-o-python-JZP83A)
 
 ## Resumo
 

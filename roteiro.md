@@ -62,7 +62,7 @@ Para cada tipo de bug desses, há técnicas e ferramentas mais adequadas para en
 
 Vamos ver quatro abordagens.
 
-### O olho humano: revisão manual
+### Revisão manual
 
 Nesse caso, procuramos os bugs ativamente, observando o código com atenção e mapeando os fluxos na nossa mente, mas sem técnicas ou ferramentas específicas para ajudar. Para funcionar, isso requer experiência e faro. É como a gente procura bugs quando está escrevendo o software e algo não funciona.
 
@@ -90,7 +90,7 @@ O Uai que eu vejo é que falta um `return` ao final do bloco do `else`: o códig
 
 É uma técnica boa para ir fundo em um problema específico, mas não para analisar muito código de maneira rápida.
 
-### Ferramentas que procuram padrões: análise estática
+### Análise estática
 
 É chamada análise estática porque examina o código sem executá-lo. Utiliza ferramentas que procuram padrões de código que indicam possíveis bugs, tentando identificar trechos do código que correspondem a regras pré-definidas. Estas regras em geral são configuráveis e muitas vezes podem ser acrescidas de regras personalizadas pela pessoa usuária.
 
@@ -102,9 +102,9 @@ Se ativamos as regras de fluxo de retorno, o grupo RET, ele encontra o UAI na ho
 
 É uma técnica capaz de lidar com grandes quantidades de código rapidamente, mas tende a gerar falsos positivos.
 
-### Programas que provocam o software com inputs: fuzzing
+### Fuzzing
 
-Fuzzing é uma técnica baseada em gerar e fornecer grandes quantidades de inputs, inclusive inesperados, extremos ou inválidos, e observar como o software reage. 
+Fuzzing é uma técnica baseada em gerar e fornecer grandes quantidades de inputs, inclusive inesperados, extremos ou inválidos, e observar como o software reage. É uma análise dinâmica, pois executa o software com esses inputs.
 
 O fuzzer gera ou modifica inputs, muitas vezes com uma parte aleatória e com um mecanismo de feedback.
 
@@ -116,7 +116,7 @@ fusil e lafleur são fuzzers mais especializados, focados no Python, que eu dese
 
 É uma técnica que escala bem, consegue encontrar bugs profundos e frequentemente produz evidências executáveis, como crashes ou comportamentos inesperados reproduzíveis. 
 
-### A mistura das anteriores: análise baseada em IA
+### Análise baseada em IA
 
 A análise baseada em IA é uma abordagem recente, na qual instruímos um LLM a procurar os bugs no código.
 
@@ -159,7 +159,7 @@ Com um crash, podemos usar um debugger como o GDB e fazer a interrupção anorma
 Slide com o backtrace do crash do super.__new__ em versão recente.
 ```
 
-Também existem ferramentas específicas para esclarecer outros aspectos de um crash, como o AddressSanitizer que analisa o estado da memória de um programa, ou o faulthandler do CPython, que nos dá um backtrace simplificado sem precisar de um debugger.
+Também existem ferramentas específicas para esclarecer outros aspectos de um crash, como o AddressSanitizer que analisa o estado da memória de um programa, ou o faulthandler do CPython, que nos dá um traceback simplificado sem precisar de um debugger.
 
 ## Crashando o Python
 
@@ -167,7 +167,7 @@ O Python é uma linguagem de programação que tem várias implementações, ou 
 
 Quando falamos do Python ou do interpretador Python, quase sempre estamos falando do CPython, principal implementação. O CPython é um software com o cerne escrito na linguagem C, além de muito Python puro na biblioteca. E esse software, essa implementação, tem vários bugs conhecidos ou não. Ao contrário dos erros que ocorrem em código Python, que resultam em exceções, problemas no código C do CPython pode causar falhas de segmentação ou aborts, dois jeitos diferentes de um programa crashar.
 
-Pois é, é uma situação indesejad e rara, mas que acontece muito. 
+Pois é, é uma situação indesejada e rara, mas que acontece muito.
 
 Para evitar que esses problemas ocorram em produção, no pior momento, tentamos procurar os bugs preventivamente. Nas minhas campanhas, uso principalmente fuzzing e IA. O fusil é capaz de encontrar crashes em várias implementações de Python, enquanto o lafleur apenas no JIT do CPython. E temos toolkits que focam em implementações específicas: CPython, PyPy e RustPython.
 
@@ -247,8 +247,6 @@ O item 4 é o alívio cômico — a mensagem de erro é a piada.
 - **CPY-0045/0046** — `struct` reinicializado com formato vazio: `list(it)` dá SIGFPE e `tuple(it)` entra em loop infinito. "Um bug, dois crashes".
 - **RUSTPY-0002** — `pwd.struct_passwd().pw_name`, uma linha, pânico; encontrado 100+ vezes em seis frotas.
 - **PYPY-FUZZ-015** — duas threads em `for line in f` segfaltam; reportado e **corrigido em 24h** (pypy#5575). Melhor uso: seção 7, como exemplo de ciclo completo.
-
-
 
 ## Crashando extensões
 
