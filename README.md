@@ -6,3 +6,15 @@ Repositório privativo para desenvolvimento da palestra ["Quebrando o seu códig
 
 - `roteiro.md` — roteiro da palestra (versão de trabalho).
 - `rascunho.md` — rascunho e anotações.
+- `apresentacao/` — slides em [reveal.js](https://revealjs.com/): `cerrado.html`, os arquivos do reveal.js em `dist/` e as imagens em `images/`.
+
+## Slides
+
+Para servir os slides localmente, recarregando a página sempre que um arquivo em `apresentacao/` mudar:
+
+```bash
+npm install   # só na primeira vez
+npm start     # http://localhost:8000/cerrado.html
+```
+
+Para usar outra porta: `npm start -- --port 9000`.

@@ -1,0 +1,12 @@
+{
+	"name": "palestra-python-cerrado-2026",
+	"private": true,
+	"type": "module",
+	"description": "Slides da palestra \"Quebrando o seu código e o Python\" (Python Cerrado 2026)",
+	"scripts": {
+		"start": "vite"
+	},
+	"devDependencies": {
+		"vite": "^8.3.5"
+	}
+}

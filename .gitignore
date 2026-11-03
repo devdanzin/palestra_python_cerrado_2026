@@ -19,3 +19,6 @@ venv/
 *.swp
 *~
 .DS_Store
+
+# Dependências do servidor de desenvolvimento dos slides (npm start)
+node_modules/
