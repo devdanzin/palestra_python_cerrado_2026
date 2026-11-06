@@ -4,22 +4,6 @@
 
 Vamos explicar como se encontram bugs em código Python, em extensões e nas implementações da linguagem. Além disso, veremos exemplos de bugs encontrados no CPython e outras implementações, em pacotes populares, e até no código dos participantes.
 
-## Linha do tempo (apenas para me situar, depois será removida)
-```
-| Seção                                 |    Duração | Conteúdo principal                              |
-| ------------------------------------- | ---------: | ----------------------------------------------- |
-| 1. Introdução                         |      2 min | Quem sou e o que vamos quebrar                  |
-| 2. O que é um bug?                    |      3 min | Tipos de falha e primeiro crash surpreendente   |
-| 3. Como encontramos bugs?             |      5 min | Revisão manual, análise estática, fuzzing e IA  |
-| 4. Quebrando implementações do Python |      8 min | CPython, JIT, PyPy ou RustPython                |
-| 5. Quebrando extensões                |      5 min | Bugs em C, C++ e Rust                           |
-| 6. Quebrando código Python puro       |      7 min | Stdlib, pacotes conhecidos e projetos sugeridos |
-| 7. Do achado à contribuição           |      3 min | Reprodução, validação e responsabilidade        |
-| 8. Conclusão e convite                |      2 min | Lições e participação da comunidade             |
-| **Apresentação**                      | **35 min** |                                                 |
-| Perguntas                             |      5 min |                                                 |
-| **Total**                             | **40 min** |                                                 |
-```
 ## Introdução
 
 Boa tarde! Esta é a palestra "Quebrando o seu código e o Python".
@@ -42,13 +26,13 @@ super.__new__(super).__get__(1)
 ```
 Se você executá-lo num Python 3.13 ou mais recente, isso vai imediatamente causar um erro de segmentação. O que isso significa? A execução é interrompida anormalmente, ou seja o interpretador para de funcionar, ou seja sofre um crash, ou seja bate as botas.
 
-Quem tiver um espírito aventureiro pode abrir um prompt de comando do Python e digitar esse código, daí me conte o que acontece. Mas não faça isso numa sessão já existente, importante pra você.
+Quem tiver um espírito aventureiro pode abrir um prompt de comando do Python e digitar esse código, daí me conte o que acontece. Só não faça isso numa sessão já existente, importante pra você.
 
 Esse código em especial não é muito preocupante porque é extremamente artificial, a gente não vai esbarrar nesse crash num programa normal. Mas muitos outros exemplos podem acontecer e acontecem em código bem comportado, artesanal, em produção. Inclusive em código com impacto na segurança ou na estabilidade do sistema.
 
 ## Tipos de bug
 
-Quando a gente fala de bug, quase todo mundo tem alguma imagem mental do que seria isso. Por exemplo quando um software interativo para de responder corretamente: "tô clicando, mas tá bugado, não faz nada!". Ou a exibição fica com problemas gráficos: "bugou!". Ou o software é encerrado inesperadamente: "fechou sozinho!". E por aí vai.
+Quando a gente fala de bug, quase todo mundo tem alguma imagem mental do que seria isso. Por exemplo quando um software interativo para de responder corretamente: "tô clicando, mas tá bugado, não faz nada!". Ou a exibição fica com problemas gráficos: "í bugou!". Ou o software é encerrado inesperadamente: "fechou sozinho!". E por aí vai.
 
 Podemos descrever de forma bem grosseira os principais tipos de bug assim:
 
@@ -96,9 +80,9 @@ O Uai que eu vejo é que falta um `return` ao final do bloco do `else`: o códig
 
 Exemplos bem conhecidos são linters como ruff e pylint e os checadores de tipagem, como mypy e pyright.
 
-Vamos dar uma rápida olhada em como uma dessas ferramentas é utilizada, o ruff. Ele é rápido e eficiente, e pode ser configurado para encontrar problemas específicos. Por exemplo, ele não encontra o nosso UAI do código anterior nas configurações padrão.
+<!-- Vamos dar uma rápida olhada em como uma dessas ferramentas é utilizada, o ruff. Ele é rápido e eficiente, e pode ser configurado para encontrar problemas específicos. Por exemplo, ele não encontra o nosso UAI do código anterior nas configurações padrão.
 
-Se ativamos as regras de fluxo de retorno, o grupo RET, ele encontra o UAI na hora, apontando que falta um `return` explícito no fim de uma função que pode retornar valores. Mas percebam que ele não sabe o quê deveria ser retornado, apenas que faltou um return.
+Se ativamos as regras de fluxo de retorno, o grupo RET, ele encontra o UAI na hora, apontando que falta um `return` explícito no fim de uma função que pode retornar valores. Mas percebam que ele não sabe o que deveria ser retornado, apenas que faltou um return. -->
 
 É uma técnica capaz de lidar com grandes quantidades de código rapidamente, mas tende a gerar falsos positivos.
 
@@ -112,25 +96,13 @@ A aleatoriedade ajuda o fuzzer a experimentar coisas que nós talvez não imagin
 
 O feedback mostra quais dessas tentativas parecem interessantes, por exemplo, porque alcançaram uma parte nova do código, e ajuda a escolher as próximas tentativas.
 
-fusil e lafleur são fuzzers mais especializados, focados no Python, que eu desenvolvo e usei em campanhas voltadas para implementações e extensões.
+Como exemplo vou citar fusil e lafleur, que são fuzzers mais especializados, focados no Python, que eu desenvolvo e usei em campanhas voltadas para implementações e extensões.
 
 É uma técnica que escala bem, consegue encontrar bugs profundos e frequentemente produz evidências executáveis, como crashes ou comportamentos inesperados reproduzíveis. 
 
 ### Análise baseada em IA
 
 A análise baseada em IA é uma abordagem recente, na qual instruímos um LLM a procurar os bugs no código.
-
-Uma abordagem que utilizo é dividir a análise entre agentes especializados. Alguns procuram erros de memória, outros problemas de concorrência, outros falhas de lógica. Eles podem usar ferramentas, executar testes e aproveitar resultados uns dos outros.
-
-E a IA também torna práticas, em grande escala, análises que seriam muito trabalhosas manualmente.
-
-Por exemplo, examinar o histórico de correções de um projeto e procurar lugares semelhantes em que o mesmo bug talvez tenha ficado para trás.
-
-É quando você corrige um bug numa função e não percebe que o mesmo bug está presente em outra função parecida.
-
-```slide
-Mesmo bug não foi corrigido em código semelhante.
-```
 
 A família de ferramentas de IA que desenvolvi foca em análise sistemática de bases de código, cada ferramenta com uma especialização adicional: análise de Python, do próprio CPython, de outras implementações, de extensões.
 
@@ -145,6 +117,19 @@ E essa família já começou a crescer com a colaboração de outras pessoas. Bh
 - rust-ext-review-toolkit: extensões em Rust, criado por Charlie Lin.
 ```
 
+Uma abordagem que utilizo é dividir a análise entre agentes especializados. Alguns procuram erros de memória, outros problemas de concorrência, outros falhas de lógica. Eles podem usar ferramentas, executar testes e aproveitar resultados uns dos outros.
+
+E a IA também torna práticas, em grande escala, análises que seriam muito trabalhosas manualmente.
+
+Por exemplo, examinar o histórico de correções de um projeto e procurar lugares semelhantes em que o mesmo bug talvez tenha ficado para trás.
+
+É quando você corrige um bug numa função e não percebe que o mesmo bug está presente em outra função parecida.
+
+```slide
+Mesmo bug não foi corrigido em código semelhante.
+```
+
+
 ## Desvendando um crash
 
 Deixa eu mostrar como a gente descobre o que deu errado quando ocorre um crash. Sabe quando ocorre uma exceção no nosso código Python e aparece a mensagem de erro, mostrando a linha com o problema e a sequência de linhas que levou até o problema? Aquilo é um traceback do código Python.
@@ -153,7 +138,7 @@ Deixa eu mostrar como a gente descobre o que deu errado quando ocorre um crash. 
 Slide com um traceback da chamada do super.__new__ em versão antiga.
 ```
 
-Com um crash, podemos usar um debugger como o GDB e fazer a interrupção anormal da execução acontecer sob observação. Isso vai nos dar a linha onde o problema ocorreu e a sequência de linhas que levou até o problema. Isso é um backtrace do código nativo.
+Com um crash, podemos usar um debugger como o GDB e fazer a interrupção anormal da execução acontecer sob observação. Isso vai nos dar a linha onde o problema ocorreu e a sequência de linhas que levou até o problema. Isso é um backtrace do código nativo. Não parece simples de entender, né? Mas corresponde bonitinho a um traceback do Python, só que falando do código em C.
 
 ```
 Slide com o backtrace do crash do super.__new__ em versão recente.
@@ -165,14 +150,13 @@ Também existem ferramentas específicas para esclarecer outros aspectos de um c
 
 O Python é uma linguagem de programação que tem várias implementações, ou seja, vários softwares capazes de entender e rodar a linguagem Python, como o CPython, o PyPy e o RustPython.
 
-Quando falamos do Python ou do interpretador Python, quase sempre estamos falando do CPython, principal implementação. O CPython é um software com o cerne escrito na linguagem C, além de muito Python puro na biblioteca. E esse software, essa implementação, tem vários bugs conhecidos ou não. Ao contrário dos erros que ocorrem em código Python, que resultam em exceções, problemas no código C do CPython pode causar falhas de segmentação ou aborts, dois jeitos diferentes de um programa crashar.
+Quando falamos do Python ou do interpretador Python, quase sempre estamos falando do CPython, principal implementação. O CPython é um software com o cerne escrito na linguagem C, além de muito Python puro na biblioteca. E esse software, essa implementação, tem vários bugs conhecidos ou não. Ao contrário dos erros que ocorrem em código Python, que resultam em exceções, problemas no código C do CPython podem causar falhas de segmentação ou aborts, dois jeitos diferentes de um programa crashar.
 
 Pois é, é uma situação indesejada e rara, mas que acontece muito.
 
-Para evitar que esses problemas ocorram em produção, no pior momento, tentamos procurar os bugs preventivamente. Nas minhas campanhas, uso principalmente fuzzing e IA. O fusil é capaz de encontrar crashes em várias implementações de Python, enquanto o lafleur apenas no JIT do CPython. E temos toolkits que focam em implementações específicas: CPython, PyPy e RustPython.
+Para evitar que esses problemas ocorram em produção, no pior momento, tentamos procurar os bugs preventivamente. Nas minhas campanhas, uso principalmente fuzzing e IA. O fusil é capaz de encontrar crashes em várias implementações de Python, enquanto o lafleur apenas no JIT do CPython. E temos os toolkits de IA já citados, que focam em implementações específicas: CPython, PyPy e RustPython.
 
-#### Outros exemplos de crashes no CPython, no PyPy e no RustPython
-
+#### Outros exemplos de crashes no CPython
 
 ##### `__iter__`
 
@@ -186,16 +170,37 @@ class Silly:
 def generator():
     yield from Silly()
 
-next(generator())  # deveria propagar RuntimeError; ocorria crash
+next(generator())
 ```
 
 Esse código é estranho? É. Mas tem alguma coisa inválida aqui? Não. O `__iter__` é perfeitamente autorizado a levantar uma exceção. O que deveria acontecer? `RuntimeError`. O que aconteceu? **Crash**.
+
+
+
+##### `list.pop`
+
+Temos aqui um exemplo no qual o Python 3.13.2 crashava com código razoavelmente normal e bem comportado.
+```python
+def call(part):
+    part.pop()
+
+call(['a'])
+try:
+    call(list)
+except TypeError:
+    raise
+```
+
+Esperado: `TypeError: unbound method list.pop() needs an argument`.
+Resultado: crash.
+
+Esse exemplo foi considerado bem sério, tanto é que virou release blocker. Isso significa que a próxima versão do Python não poderia ser lançada antes que o bug fosse corrigido.
 
 ##### `_grouper_next`
 
 Vamos ver um exemplo do tipo de erro que uma dessas ferramentas de IA encontra:
 
-O alvo da análise era o código por trás do `groupby`, uma ferramenta do módulo `itertools` do Python. Uma correção anterior protegeu referências em `groupby_next` antes de chamar código Python reentrante, por exemplo um dunder eq que avança o iterador.
+<!-- O alvo da análise era o código por trás do `groupby`, uma ferramenta do módulo `itertools` do Python. Uma correção anterior protegeu referências em `groupby_next` antes de chamar código Python reentrante, por exemplo um dunder eq que avança o iterador.
 
 O `cpython-review-toolkit` examinou o histórico e encontrou a mesma operação desprotegida na função irmã `_grouper_next`. Um `__eq__` malicioso podia reentrar no iterador, substituir e liberar uma chave ainda em uso, produzindo use-after-free e causando crash.
 
@@ -221,32 +226,55 @@ key, grouper_iter = next(g)
 items = list(grouper_iter)
 ```
 
-Não precisa entender esse código inteiro. Olhem só para isto: durante o `__eq__`, ele avança o próprio iterador. Usando essa classe como no código à direita, temos um crash.
+Não precisa entender esse código inteiro. Olhem só para isto: durante o `__eq__`, ele avança o próprio iterador. Usando essa classe como no código à direita, temos um crash. -->
 
 Você corrige um bug numa função e esquece outra função parecida. Lembram quando eu falei nisso? Acontece de verdade.
 
 
 #### Quebrando implementações do Python (cerca 8 min, 4 bugs?)
 
-| # | Bug | Alvo | Tipo | Origem | Situação | Risco de demo |
-|---|---|---|---|---|---|---|
-| 1 | **CPY-0055** — `pickle.dumps` de 9 linhas segfalta; a correção existia, foi *revertida* para tirar um teste caro e a entrada do changelog foi apagada | CPython (GIL comum) | segfault | IA (git-history-analyzer) | reportado gh-146452 (fechado com os defeitos vivos) | baixo |
-| 2 | **PYPY-FUZZ-016** — `next(z); list(z)` num `zip_longest` segfalta no PyPy; o `for` passa ileso | PyPy 7.3.23 | segfault | fusil (1745 linhas → 3) | reproduced 12/12; não reportado | baixo (PyPy ≤ 7.3.23) |
-| 3 | **RUSTPY-0007a + CPY-0002** — `L = []; L.append(L); list[L].__parameters__` derruba RustPython **e** CPython | dois interpretadores | segfault (recursão) | fusil + IA, independentes | CPython corrigido e backportado (gh-154275); RustPython aberto (#2796) | médio: CPython atualizado já levanta `RecursionError` — mostrar antes/depois |
-| 4 | **RUSTPY-0010** — `binascii.b2a_qp(b'\n')`: "the len is 8 but the index is 18446744073709551615" | RustPython 0.5.0 | pânico Rust (underflow) | fusil | confirmed; não reportado | baixo |
+##### Lista recursiva no RustPython
 
-Por que estes quatro: três interpretadores, três origens (IA, fuzzing, ambos), quatro mecanismos
-diferentes (ponteiro nulo após mutação, invariante copiado por copy-paste, recursão sem guarda,
-underflow de inteiro sem sinal), e dois ganchos de história fortes (revert; crash compartilhado).
-O item 4 é o alívio cômico — a mensagem de erro é a piada.
+```python
+L = []
+L.append(L)
+list[L].__parameters__
+```
+Esperado: `RecursionError`
+Resultado: crash
 
-**Reservas, em ordem:**
-- **CPY-0261** — `del ctx.keylog_filename` derruba o SSL desde a 3.9 (uma linha, qualquer build, não reportado). Troca direta pelo item 1 se quiser algo mais cotidiano que `__reduce__`.
-- **OOM-0001** — `warnings.warn("boom")` sem memória segfalta em 4 linhas (reportado #151673). Único representante do modo OOM; exige build debug por causa de `_testcapi`. A frase honesta do slide: "pedi que a próxima alocação falhasse; em vez de MemoryError, segfault".
-- **TSAN-0053** — duas threads esgotam o mesmo iterador de dict e o dict é liberado duas vezes (reportado #154130; a issue anterior tinha sido fechada como "benigna"). Único representante de free-threading; exige `PYTHON_GIL=0`, intermitente mas ~8/8.
-- **CPY-0045/0046** — `struct` reinicializado com formato vazio: `list(it)` dá SIGFPE e `tuple(it)` entra em loop infinito. "Um bug, dois crashes".
-- **RUSTPY-0002** — `pwd.struct_passwd().pw_name`, uma linha, pânico; encontrado 100+ vezes em seis frotas.
-- **PYPY-FUZZ-015** — duas threads em `for line in f` segfaltam; reportado e **corrigido em 24h** (pypy#5575). Melhor uso: seção 7, como exemplo de ciclo completo.
+Este bug é interessante não porque seja sério ou um código normal, mas porque atingia duas implementações de Python: RustPython e CPython. Quando a gente acha um bug numa implementação diferente, o normal é comparar com o CPython pra ver qual é o comportamento esperado. Nesse caso, o CPython tinha o mesmo defeito!
+
+Também é interessante porque foi encontrado com IA e fuzzing de forma independente.
+
+
+##### `zip_longest` no PyPy
+```python
+import itertools
+z = itertools.zip_longest([], [1, 2, 3])
+next(z)   # arg 0 is exhausted here; z itself is still live
+list(z)   # SIGSEGV
+```
+
+Esperado: `[]`, uma lista vazia.
+Resultado: crash
+
+##### `binascii` no RustPython
+
+```python
+binascii.b2a_qp(b'\n')
+```
+
+Esperado: `b'\n'`
+Resultado: pânico do Rust
+
+```rust
+  thread 'main' panicked at crates/stdlib/src/binascii.rs:507:49:
+  index out of bounds: the len is 8 but the index is 18446744073709551615
+```
+
+Como podemos ver o Rust fica um pouco confuso e procurando um índice de 18 quintilhões.
+
 
 ## Crashando extensões
 
@@ -267,19 +295,16 @@ Um caminho comum para esses erros é:
 
 | # | Bug | Alvo | Tipo | Origem | Situação | Risco de demo |
 |---|---|---|---|---|---|---|
+
+| repo#n | Título | Tipo | /15 | Fix em |
+| numpy#31046 → PR#31297 | `arr.flags["é"] = True` segfalta; re-reportado por um "agentic security harness" sem citar; o PR de um brasileiro feito do gist do palestrante virou **duplicata** | segfault | 15 | ≤ 30 d |
+| numpy#28787 | `numpy.float128().round(-2**31)` segfalta; *"almost led to a CVE"* | segfault (UB) | 14 | 188 d |
+
 | 1 | **CX-MULTIDICT-0002** — `MultiDict().add(key="k")` segfalta; a versão em Python puro dá `TypeError` | multidict (C; base do aiohttp) | segfault | IA (parity-checker) | PR #1376 aberto a pedido do mantenedor | baixo (versão ≤ 6.7.2.dev0) |
-| 2 | **CRYPTOGRAPHY-0001 / RX-CRYPTOGRAPHY-0001** — `padding.PKCS7(0).padder().finalize()`: zero passa pela validação e o Rust divide por zero | cryptography (Rust/PyO3) | pânico Rust | fusil **e** IA, independentes | confirmed; não reportado | baixo (checar release atual) |
-| 3 | **PYDANTIC-0004 / RX-PYDANTIC_CORE-0023** — `TzInfo(-1e18)`: o `abs()` que ia devolver `ValueError` entra em pânico antes | pydantic-core (Rust) | pânico Rust (overflow) | fusil + IA | confirmed; não reportado | baixo |
 
-O item 2 tem um detalhe delicioso para plateia mista: a extensão é Rust, mas **o bug está no
-validador em Python** — `0 <= block_size` em vez de `0 <`. Um off-by-one em Python derruba o
-código "seguro". O item 3 é "a checagem que ia rejeitar o valor é a que quebra". Se só couberem
-dois, fique com 1 e 2 (C + Rust, IA + fuzzing).
 
-**Reservas:** **CX-MULTIDICT-0001** (`d.extend(d)` use-after-free; PR #1379) — ótimo "Uai", mas só
-crasha visivelmente em build debug/ASan. **TOKENIZERS-0001** (`BPEDecoder().decode([])`,
-`0usize - 1`) — só em build com overflow-checks; o release "funciona por coincidência", o que é
-uma história honesta e interessante, mas não é demo.
+| CX-MULTIDICT-0001 | `d.extend(d)` use-after-free — crasha em release **sem ASan**; PR mesclado 06/09; ressalva de UAF resolvida | 23 | +3 | SEGURO COM BUILD multidict==6.7.1 |
+
 
 ## Encontrando bugs em Python puro
 
@@ -288,28 +313,27 @@ As minhas ferramentas de fuzzing não são boas para encontrar problemas em Pyth
 Com o code-review-toolkit, encontramos diversos tipos de bugs, desde problemas sutis de lógica até erros de fluxo de execução desastrosos, passando por esgotamento de recursos e falhas de segurança.
 
 #### Problemas encontrados na stdlib
-#### Problemas encontrados em pacotes conhecidos
-#### Problemas encontrados no pavedb, scanapi e brutils, pacotes sugeridos pelos mantenedores
-
-Quebrando código Python puro (7 min, 3–4 bugs)
-
-| # | Bug | Alvo | Tipo | Origem | Situação | Risco de demo |
-|---|---|---|---|---|---|---|
-| 1 | **CRF-COVPY-0007** — `--fail-under=99.9` passa num relatório que imprime 99% | coverage.py | resultado errado (gate de CI) | IA (silent-failure-hunter) | reproduced; #1168 "corrigiu" só o caso 100 | baixo: 3 linhas puras |
 | 2 | **CRF-PYREPL-0014** — Ctrl-C no REPL novo grava no histórico a linha que você cancelou | CPython 3.13+ `_pyrepl` | resultado errado (privacidade) | IA (parity-check vs GNU readline) | reproduced; não reportado | médio: precisa de terminal real (gif/vídeo) |
 | 3 | **CRF-IDLELIB-0035** — Format Paragraph do IDLE come uma letra de cada linha de código | idlelib | corrupção silenciosa de fonte | IA | reportado #154760 l.35 | baixo: `reformat_comment` é função pura |
 | 4 | **CRF-IDLELIB-0027** — `if sellast[-1] != '0'`: copiar-com-prompts perde a última linha nas colunas 10, 20, 100… | idlelib | resultado errado | IA | reportado #154760 l.27 | o "Uai" está na linha; a prova precisa de Tk |
+#### Problemas encontrados em pacotes conhecidos
+| # | Bug | Alvo | Tipo | Origem | Situação | Risco de demo |
+|---|---|---|---|---|---|---|
+| 1 | **CRF-COVPY-0007** — `--fail-under=99.9` passa num relatório que imprime 99% | coverage.py | resultado errado (gate de CI) | IA (silent-failure-hunter) | reproduced; #1168 "corrigiu" só o caso 100 | baixo: 3 linhas puras |
+
+
+#### Problemas encontrados no pavedb, scanapi e brutils, pacotes sugeridos pelos mantenedores
+
+
+Quebrando código Python puro (7 min, 3–4 bugs)
+
+
+
 
 Quatro vítimas diferentes (CI, histórico, editor, clipboard), três ferramentas que a plateia usa, e
 nenhum crash — é aqui que a tese "crash é o bug bonzinho" fecha. O item 1 tem a frase pronta:
 "duas funções no mesmo arquivo, duas direções de arredondamento". O item 2 tem o contraste
 "o readline em C acerta há décadas; a reescrita em Python trocou o significado de `finish`".
-
-**Reservas:** **CRF-COVPY-0071** (com `--ignore-errors`, apagar um arquivo *sobe* a cobertura de 69%
-para 86%) — a opção "ignorar erros" premia o erro; exige mini-projeto. **CRF-PYREPL-0013** (histórico
-latin-1 destruído na primeira saída: leitura com `errors='replace'`, escrita UTF-8 estrita).
-**CRF-COVPY-0066** (`\n` num `omit` trava o coverage para sempre; o `# pragma: always breaks` que
-escondeu o caminho da própria cobertura).
 
 Considerar substituir alguns casos por exemplos dos projetos analisados a pedido das pessoas mantenedoras.
 
@@ -322,7 +346,7 @@ Dois fios atravessam os exemplos de bug que vimos.
 
 1. **Crash é o bug bonzinho: ele avisa.** Não significa que um crash não possa ser um problema sério, inclusive de segurança, mas o fato de o programa parar de rodar dá um sinal claro de que existe um problema. Com o resultado errado silencioso, o problema pode permanecer oculto, causando prejuízos.
 
-2. **O bug ao lado do bug corrigido.** Uma grande proporção dos bugs que encontro são casos onde o fix esqueceu de corrigir a *função irmã*, justificando a análise cuidadosa de histórico correções no git.
+2. **O bug ao lado do bug corrigido.** Uma grande proporção dos bugs que encontro são casos onde o fix esqueceu de corrigir a *função irmã*, justificando a análise cuidadosa de histórico de correções no git.
 
 ## Do achado à contribuição: reportando responsavelmente
 

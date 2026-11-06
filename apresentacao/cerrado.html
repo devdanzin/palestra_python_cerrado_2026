@@ -7,7 +7,7 @@
 	<title>Quebrando o seu código e o Python</title>
 
 	<meta name="description"
-				content="Palestra apresentada na Python Cerrado 2026 sobre caça aos bugs no ecossistema Python." />
+		content="Palestra apresentada na Python Cerrado 2026 sobre caça aos bugs no ecossistema Python." />
 	<meta name="author" content="Daniel Diniz" />
 
 	<meta name="mobile-web-app-capable" content="yes" />
@@ -24,47 +24,45 @@
 </head>
 
 <body>
-<div class="reveal">
-	<!-- Any section element inside of this container is displayed as a slide -->
-	<div class="slides">
-		<section>
-			<h1>Quebrando o seu código e o</h1>
-			<img class="logo-titulo" src="images/python-logo-transparent2.png" style="width: 70%;" alt="Python" />
-			<p>
-			<h3>Daniel Diniz</h3>
-			<small>Criado com
-				<a href="https://github.com/hakimel/reveal.js/">reveal.js</a></small>
+	<div class="reveal">
+		<!-- Any section element inside of this container is displayed as a slide -->
+		<div class="slides">
+			<section>
+				<h1>Quebrando o seu código e o</h1>
+				<img class="logo-titulo" src="images/python-logo-transparent2.png" style="width: 70%;" alt="Python" />
+				<h3>Daniel Diniz</h3>
+				<small>Criado com
+					<a href="https://github.com/hakimel/reveal.js/">reveal.js</a></small>
+			</section>
 
-		</section>
+			<section>
+				<h1>Introdução</h1>
+			</section>
 
-		<section>
-			<h1>Introdução</h1>
-		</section>
-
-		<section id="um_bug">
-			<h1>Um bug!</h1>
-			<pre
-				class="fragment"><code class="hljs python center" data-trim>super.__new__(super).__get__(1)</code></pre>
-			<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
+			<section id="um_bug">
+				<h1>Um bug!</h1>
+				<pre
+					class="fragment"><code class="hljs python center" data-trim>super.__new__(super).__get__(1)</code></pre>
+				<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
 Program received signal SIGSEGV, Segmentation fault.
 supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
 at Objects/typeobject.c:12719
 12719                   type_or_instance, obj_str, type->tp_name);</code></pre>
-		</section>
+			</section>
 
-		<section>
-			<h1>Tipos de bug</h1>
-			<h2 class="fragment">Crash</h2>
-			<h2 class="fragment">Fluxo inesperado</h2>
-			<h2 class="fragment">Estado inconsistente</h2>
-			<h2 class="fragment">Resultado errado</h2>
-			<h2 class="fragment">Vulnerabilidade</h2>
-		</section>
+			<section>
+				<h1>Tipos de bug</h1>
+				<h2 class="fragment">Crash</h2>
+				<h2 class="fragment">Fluxo inesperado</h2>
+				<h2 class="fragment">Estado inconsistente</h2>
+				<h2 class="fragment">Resultado errado</h2>
+				<h2 class="fragment">Vulnerabilidade</h2>
+			</section>
 
-		<section>
-			<h1>Encontrando bugs</h1>
-			<h3 class="fragment">Revisão manual</h3>
-			<pre id="max_power_pre"><code id="max_power" class="hljs python fragment" data-trim data-line-numbers="|7|7,11">
+			<section>
+				<h1>Encontrando bugs</h1>
+				<h3 class="fragment">Revisão manual</h3>
+				<pre id="max_power_pre"><code id="max_power" class="hljs python fragment" data-trim data-line-numbers="|7|7,11">
 def max_power(a, b):
     """Maior número na exponenciação de um par."""
     if a &gt; b:
@@ -78,95 +76,95 @@ def max_power(a, b):
             result = abs(result)
                     </code></pre>
 
-		</section>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h1>Encontrando bugs</h1>
-					<h3 class="fragment">Análise estática</h3>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h1>Encontrando bugs</h1>
+						<h3 class="fragment">Análise estática</h3>
+					</div>
+					<div>
+						<img class="fragment" src="images/Analise_Estatica_Codigo_Python.png "
+							alt="Análise Estática Código Python" />
+					</div>
+
 				</div>
-				<div>
-					<img class="fragment" src="images/Analise_Estatica_Codigo_Python.png "
-							 alt="Análise Estática Código Python" />
+			</section>
+
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h1>Encontrando bugs</h1>
+						<h3 class="fragment">Fuzzing</h3>
+					</div>
+					<div>
+						<img class="fragment" src="images/Fuzzing_Aleatoriedade_e_Feedback.png"
+							alt="Fuzzing Aleatoriedade e Feedback" />
+					</div>
+
 				</div>
+			</section>
 
-			</div>
-		</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h1>Encontrando bugs</h1>
-					<h3 class="fragment">Fuzzing</h3>
+			<section data-transition="fade-out">
+				<div style="height: 100%;">
+					<div>
+						<h1>Encontrando bugs</h1>
+						<h3 class="fragment">IA</h3>
+					</div>
+					<div>
+						<ul class="fragment">
+							<li>code (Python puro)</li>
+							<li>cext (extensões C e C++)</li>
+							<li>ft (suporte a Free Threading)</li>
+							<li>cpython (CPython em si)</li>
+						</ul>
+						<ul class="fragment">
+							<li>pypy: PyPy, criado por Bhuvansh Kataria.</li>
+							<li>rust-ext: extensões em Rust, criado por Charlie Lin.</li>
+						</ul>
+					</div>
+
 				</div>
-				<div>
-					<img class="fragment" src="images/Fuzzing_Aleatoriedade_e_Feedback.png"
-							 alt="Fuzzing Aleatoriedade e Feedback" />
+			</section>
+
+
+			<section data-transition="convex">
+				<div style="height: 100%;">
+					<div>
+						<h1>Encontrando bugs</h1>
+						<h3>IA</h3>
+					</div>
+					<div>
+						<img class="fragment" src="images/IA_encontra_codigo_semelhante.png"
+							alt="IA encontra código semelhante" style="padding: 10px;" />
+					</div>
+
 				</div>
+			</section>
 
-			</div>
-		</section>
-
-
-		<section data-transition="fade-out">
-			<div style="height: 100%;">
-				<div>
-					<h1>Encontrando bugs</h1>
-					<h3 class="fragment">IA</h3>
-				</div>
-				<div>
-					<ul class="fragment">
-						<li>code (Python puro)</li>
-						<li>cext (extensões C e C++)</li>
-						<li>ft (suporte a Free Threading)</li>
-						<li>cpython (CPython em si)</li>
-					</ul>
-					<ul class="fragment">
-						<li>pypy: PyPy, criado por Bhuvansh Kataria.</li>
-						<li>rust-ext: extensões em Rust, criado por Charlie Lin.</li>
-					</ul>
-				</div>
-
-			</div>
-		</section>
-
-
-		<section data-transition="convex">
-			<div style="height: 100%;">
-				<div>
-					<h1>Encontrando bugs</h1>
-					<h3>IA</h3>
-				</div>
-				<div>
-					<img class="fragment" src="images/IA_encontra_codigo_semelhante.png"
-							 alt="IA encontra código semelhante" style="padding: 10px;" />
-				</div>
-
-			</div>
-		</section>
-
-		<section id="desvendando">
-			<div style="height: 100%;">
-				<div>
-					<h2 id="desvendando_h2">Desvendando um crash</h2>
-				</div>
-				<pre
-					class="fragment"><code class="hljs python center" data-trim>super.__new__(super).__get__(1)</code></pre>
-				<pre class="fragment"><code class="hljs python" data-trim>
+			<section id="desvendando">
+				<div style="height: 100%;">
+					<div>
+						<h2 id="desvendando_h2">Desvendando um crash</h2>
+					</div>
+					<pre
+						class="fragment"><code class="hljs python center" data-trim>super.__new__(super).__get__(1)</code></pre>
+					<pre class="fragment"><code class="hljs python" data-trim>
 Traceback (most recent call last):
   File "&lt;string&gt;", line 1, in &lt;module&gt;
 TypeError: super(type, obj): obj must be an instance or subtype of type</code></pre>
-			</div>
-		</section>
-
-
-		<section id="desvendando_2">
-			<div style="height: 100%;">
-				<div>
-					<h2>Desvendando um crash</h2>
 				</div>
-				<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
+			</section>
+
+
+			<section id="desvendando_2">
+				<div style="height: 100%;">
+					<div>
+						<h2>Desvendando um crash</h2>
+					</div>
+					<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
 Program received signal SIGSEGV, Segmentation fault.
 #0  supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
     at Objects/typeobject.c:12719
@@ -185,225 +183,319 @@ Program received signal SIGSEGV, Segmentation fault.
     call_instrumentation=false, frame=frame@entry=0x7ffff7fa9020,
     this_instr=0x7ffff7559ef2, tstate=0x555555cc63a8 &lt;_PyRuntime+266456&gt;)
     at Python/ceval.c:791</code></pre>
-			</div>
-		</section>
+				</div>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Quebrando o Python</h2>
-				</div>
-				<div>
-				</div>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando o Python</h2>
+					</div>
+					<pre class="fragment"><code class="hljs python" data-trim>
+class Silly:
+    def __iter__(self):
+        raise RuntimeError("Spam spam spam!")
 
-			</div>
-		</section>
+def generator():
+    yield from Silly()
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Quebrando o Python</h2>
-				</div>
-				<div>
-				</div>
+next(generator())</code></pre>
+					<div>
+					</div>
 
-			</div>
-		</section>
+				</div>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Quebrando implementações</h2>
-				</div>
-				<div>
-				</div>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando o Python</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python" data-trim>
+def call(part):
+    part.pop()
 
-			</div>
-		</section>
+call(['a'])
+try:
+    call(list)
+except TypeError:
+    raise</code></pre>
+					</div>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Quebrando implementações</h2>
 				</div>
-				<div>
-				</div>
+			</section>
 
-			</div>
-		</section>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando implementações</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python" data-trim>
+L = []
+L.append(L)
+list[L].__parameters__
+						</code></pre>
+					</div>
+				</div>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Quebrando extensões</h2>
-				</div>
-				<div>
-				</div>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando implementações</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python" data-trim>
+import itertools
 
-			</div>
-		</section>
+z = itertools.zip_longest([], [1, 2, 3])
+next(z)
+list(z)
+						</code></pre>
+					</div>
+				</div>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Quebrando extensões</h2>
-				</div>
-				<div>
-				</div>
+			<section id="binascii">
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando implementações</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python center" data-trim>
+import binascii
 
-			</div>
-		</section>
+binascii.b2a_qp(b'\n')
+						</code></pre>
+					</div>
+				</div>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Quebrando extensões</h2>
-				</div>
-				<div>
-				</div>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando extensões</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python" data-trim>
+import numpy as np
 
-			</div>
-		</section>
+arr = np.array([1, 2, 3])
+arr.flags["é"] = True
+						</code></pre>
+					</div>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Bugs em Python puro</h2>
 				</div>
-				<div>
-				</div>
+			</section>
 
-			</div>
-		</section>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando extensões</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python" data-trim>
+import numpy
+
+numpy.float128().round(-2**31)
+						</code></pre>
+					</div>
+
+				</div>
+			</section>
+
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando extensões</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python" data-trim>
+from multidict import MultiDict
+
+MultiDict().add(key="k") 
+						</code></pre>
+					</div>
+
+				</div>
+			</section>
+
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Quebrando extensões</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python center" data-trim>
+from multidict import MultiDict
+
+lista_de_tuples = [(f"k{i}", i) for i in range(64)]
+d = MultiDict(lista_de_tuples)
+d.extend(d) 
+						</code></pre>
+					</div>
+
+				</div>
+			</section>
+
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Bugs em Python puro</h2>
+					</div>
+					<div>
+						<pre class="fragment"><code class="hljs python" data-trim>
+
+						</code></pre>
+
+					</div>
+
+				</div>
+			</section>
 
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Bugs em Python puro</h2>
-				</div>
-				<div>
-				</div>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Bugs em Python puro</h2>
+					</div>
+					<div>
+					</div>
 
-			</div>
-		</section>
+				</div>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Bugs no seu código</h2>
-				</div>
-				<div>
-				</div>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Bugs no seu código</h2>
+					</div>
+					<div>
+					</div>
 
-			</div>
-		</section>
+				</div>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Bugs no seu código</h2>
-				</div>
-				<div>
-				</div>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Bugs no seu código</h2>
+					</div>
+					<div>
+					</div>
 
-			</div>
-		</section>
+				</div>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Lições importantes</h2>
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Lições importantes</h2>
+						<br />
+						<br />
+					</div>
+					<div>
+						<h3 class="fragment">Crash é o bug bonzinho: ele avisa</h3>
+						<br />
+						<h3 class="fragment">O bug vivo ao lado do bug corrigido</h3>
+					</div>
 				</div>
-				<div>
-				</div>
-			</div>
-		</section>
+			</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Do achado à contribuição</h2>
-				</div>
-				<div>
-				</div>
-			</div>
-		</section>
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Do achado à contribuição</h2>
-				</div>
-				<div>
-				</div>
-			</div>
-		</section>
+            <section>
+                <h2>Fluxo de Evidência</h2>
+                <pre class="fragment">
 
-		<section>
-			<div style="height: 100%;">
-				<div>
-					<h2>Conclusão</h2>
-				</div>
-				<div>
-				</div>
-			</div>
-		</section>
+Achados candidatos
+        ↓
+Reproduzir + cruzar + deduplicar
+        ↓
+Evidência priorizada
+                </pre>
+            </section>
 
-		<section id="contato">
-			<div>
-				<h2>Contato</h2>
-				<!-- Ícones decorativos: o texto ao lado já identifica cada contato (alt vazio de propósito). -->
-				<p>
-					<img class="contato-icone" src="images/email.png" alt="" />
-					<span>devdanzin@gmail.com</span>
-				</p>
-				<p>
-					<img class="contato-icone" src="images/telegram.png" alt="" />
-					<span>https://t.me/devdanzin</span>
-				</p>
-				<p>
-					<img class="contato-icone" src="images/github.png" alt="" />
-					<span>https://github.com/devdanzin</span>
-				</p>
-				<p>
-					<img class="contato-icone" src="images/mastodon_pq.png" alt="" />
-					<span>https://mastodon.social/@danzin</span>
-				</p>
-				<p>
-					<img class="contato-icone" src="images/python-logo-only.png" alt="" />
-					<span>https://discuss.python.org/u/devdanzin</span>
-				</p>
-			</div>
-		</section>
+            <section>
+                <h2>Do achado à contribuição</h2>
+                <pre class="fragment">
+achado
+    ↓
+reproducer
+    ↓
+deduplicação
+    ↓
+comunicação + validação
+    ↓
+correção</pre>
+                <h3 class="fragment">Respeito às pessoas mantenedoras</h3>
+			</section>
+
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Conclusão</h2>
+					</div>
+					<div>
+					</div>
+				</div>
+			</section>
+
+			<section id="contato">
+				<div>
+					<h2>Contato</h2>
+					<!-- Ícones decorativos: o texto ao lado já identifica cada contato (alt vazio de propósito). -->
+					<p>
+						<img class="contato-icone" src="images/email.png" alt="" />
+						<span>devdanzin@gmail.com</span>
+					</p>
+					<p>
+						<img class="contato-icone" src="images/telegram.png" alt="" />
+						<span>https://t.me/devdanzin</span>
+					</p>
+					<p>
+						<img class="contato-icone" src="images/github.png" alt="" />
+						<span>https://github.com/devdanzin</span>
+					</p>
+					<p>
+						<img class="contato-icone" src="images/mastodon_pq.png" alt="" />
+						<span>https://mastodon.social/@danzin</span>
+					</p>
+					<p>
+						<img class="contato-icone" src="images/python-logo-only.png" alt="" />
+						<span>https://discuss.python.org/u/devdanzin</span>
+					</p>
+				</div>
+			</section>
+		</div>
 	</div>
-</div>
 
-<script src="dist/reveal.js"></script>
-<script src="dist/plugin/zoom.js"></script>
-<script src="dist/plugin/notes.js"></script>
-<script src="dist/plugin/search.js"></script>
-<script src="dist/plugin/markdown.js"></script>
-<script src="dist/plugin/highlight.js"></script>
-<script>
-	// Also available as an ES module, see: https://revealjs.com/initialization/
-	// import Reveal from 'reveal.js';
-	// import RevealZoom from 'reveal.js/plugin/zoom';
-	// import RevealNotes from 'reveal.js/plugin/notes';
-	// import RevealSearch from 'reveal.js/plugin/search';
-	// import RevealMarkdown from 'reveal.js/plugin/markdown';
-	// import RevealHighlight from 'reveal.js/plugin/highlight';
+	<script src="dist/reveal.js"></script>
+	<script src="dist/plugin/zoom.js"></script>
+	<script src="dist/plugin/notes.js"></script>
+	<script src="dist/plugin/search.js"></script>
+	<script src="dist/plugin/markdown.js"></script>
+	<script src="dist/plugin/highlight.js"></script>
+	<script>
+		// Also available as an ES module, see: https://revealjs.com/initialization/
+		// import Reveal from 'reveal.js';
+		// import RevealZoom from 'reveal.js/plugin/zoom';
+		// import RevealNotes from 'reveal.js/plugin/notes';
+		// import RevealSearch from 'reveal.js/plugin/search';
+		// import RevealMarkdown from 'reveal.js/plugin/markdown';
+		// import RevealHighlight from 'reveal.js/plugin/highlight';
 
-	Reveal.initialize({
-		controls: true,
-		progress: true,
-		center: true,
-		hash: true,
+		Reveal.initialize({
+			controls: true,
+			progress: true,
+			center: true,
+			hash: true,
 
-		// Learn about plugins: https://revealjs.com/plugins/
-		plugins: [RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight],
-	});
-</script>
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight],
+		});
+	</script>
 </body>
 
 </html>
