@@ -1,0 +1,57 @@
+/*
+ * Tema claro da apresentação.
+ *
+ * Ativado por cerrado.html?tema=claro: o <script> no <head> acrescenta a classe
+ * "tema-claro" ao <html> e troca o tema de código (monokai → github).
+ * Este arquivo é carregado depois de black.css e só sobrescreve o que depende
+ * do fundo escuro; o restante (fontes, tamanhos, layout) continua em black.css.
+ * As cores vêm do white.css do reveal.js 6.0.2.
+ */
+
+html.tema-claro {
+    --r-background: #fff;
+    --r-background-color: #fff;
+    --r-main-color: #222;
+    --r-heading-color: #222;
+    --r-link-color: #2a76dd;
+    --r-link-color-dark: #1f64c1;
+    --r-link-color-hover: #4a8be2;
+    --r-selection-background-color: #2a76dd;
+    --r-selection-color: #fff;
+    --r-overlay-element-bg-color: 0, 0, 0;
+    --r-overlay-element-fg-color: 240, 240, 240;
+}
+
+/* black.css usa um branco translúcido, invisível sobre fundo claro. */
+html.tema-claro .reveal blockquote {
+    background: #0000000d;
+}
+
+/* O tema github do highlight.js usa fundo branco puro; um cinza leve
+   mantém o bloco de código visível sobre o slide branco.
+   Ele também define "pre code.hljs { padding: 1em }", que vence o
+   "padding: 5px" de .reveal pre code em black.css (mesma especificidade,
+   carregado depois) e deixa os blocos mais altos que no tema escuro, onde
+   o monokai perde para black.css. Repetimos os 5px para o layout ser igual. */
+html.tema-claro .reveal pre code.hljs {
+    background: #f4f4f4;
+    padding: 5px;
+}
+
+/* Bloco de contato: fundo claro com o QR code (módulos pretos sobre branco). */
+html.tema-claro #contato {
+    background-color: #fff;
+}
+
+/* Ícones de contato: cada tema mostra só a versão com contraste no seu fundo. */
+.so-claro {
+    display: none;
+}
+
+html.tema-claro .so-claro {
+    display: inline;
+}
+
+html.tema-claro .so-escuro {
+    display: none;
+}

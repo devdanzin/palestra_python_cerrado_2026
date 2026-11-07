@@ -18,3 +18,5 @@ npm start     # http://localhost:8000/cerrado.html
 ```
 
 Para usar outra porta: `npm start -- --port 9000`.
+
+O deck tem dois temas. O escuro é o padrão; o claro é ativado pela URL: http://localhost:8000/cerrado.html?tema=claro. As cores do tema claro ficam em `apresentacao/dist/theme/claro.css`.

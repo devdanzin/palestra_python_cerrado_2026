@@ -20,7 +20,15 @@
 	<link rel="stylesheet" href="dist/theme/black.css" id="theme" />
 
 	<!-- Theme used for syntax highlighting of code -->
-	<link rel="stylesheet" href="dist/plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="dist/plugin/highlight/monokai.css" id="tema-codigo" />
+	<link rel="stylesheet" href="dist/theme/claro.css" />
+	<script>
+		// Tema claro: cerrado.html?tema=claro (as cores estão em dist/theme/claro.css).
+		if (new URLSearchParams(location.search).get('tema') === 'claro') {
+			document.documentElement.classList.add('tema-claro');
+			document.getElementById('tema-codigo').href = 'dist/plugin/highlight/github.css';
+		}
+	</script>
 </head>
 
 <body>
@@ -69,11 +77,12 @@ execução continua com NULL
 			<section id="desvendando_2">
 				<div style="height: 100%;">
 					<div>
-						<h2>Desvendando um crash</h2>
+						<h3>Desvendando um crash</h3>
 					</div>
 					<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
 Program received signal SIGSEGV, Segmentation fault.
-supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;) at Objects/typeobject.c:12719
+supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
+at Objects/typeobject.c:12719
 12719                   type_or_instance, obj_str, type->tp_name);
 #0  supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
     at Objects/typeobject.c:12719
@@ -393,7 +402,7 @@ d = MultiDict(lista_de_tuples)
 d.extend(d)
 						</code></pre>
 					<div>
-						<h3 class="fragment">Esperado: TypeError (falta "value")</h3>
+						<h3 class="fragment">Esperado: duplicação de "d"</h3>
 						<h3 class="fragment">Resultado: <code>Crash</code></h3>
 					</div>
 					</div>
@@ -428,7 +437,7 @@ print(repr(reformat_comment(src, 72, get_comment_header(src))))</code></pre>
 				<div style="height: 100%;">
 					<div>
 						<h2>Bugs em Python puro</h2>
-						<h3>coveragepy</h3>
+						<h3>coverage.py</h3>
 					</div>
 					<div><pre class="fragment wider"><code class="hljs python" data-trim>
 from coverage.results import display_covered, should_fail_under
@@ -484,7 +493,7 @@ r = TestClient(a).post("/v1/collections/acme/books", content=body)
 print(r.status_code)
 </code></pre>
 						<h3 class="fragment">Esperado: <code class="smaller_code">413 -> Rejeitado</code></h3>
-						<h3 class="fragment">Resultado: <code class="smaller_code">422 -> Aceito</code></h3>
+						<h3 class="fragment">Resultado: 422 -> Passou do limite</h3>
 					</div>
 
 				</div>
@@ -537,7 +546,8 @@ correção</pre>
 					<h2>Contato</h2>
 					<!-- Ícones decorativos: o texto ao lado já identifica cada contato (alt vazio de propósito). -->
 					<p>
-						<img class="contato-icone" src="images/email.png" alt="" />
+						<img class="contato-icone so-escuro" src="images/email.png" alt="" />
+						<img class="contato-icone so-claro" src="images/email_light.png" alt="" />
 						<span>devdanzin@gmail.com</span>
 					</p>
 					<p>
@@ -545,7 +555,8 @@ correção</pre>
 						<span>https://t.me/devdanzin</span>
 					</p>
 					<p>
-						<img class="contato-icone" src="images/github_dark.png" alt="" />
+						<img class="contato-icone so-escuro" src="images/github_dark.png" alt="" />
+						<img class="contato-icone so-claro" src="images/github.svg" alt="" />
 						<span>https://github.com/devdanzin</span>
 					</p>
 					<p>
