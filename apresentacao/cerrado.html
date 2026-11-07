@@ -27,6 +27,7 @@
 	<div class="reveal">
 		<!-- Any section element inside of this container is displayed as a slide -->
 		<div class="slides">
+
 			<section>
 				<h1>Quebrando o seu código e o</h1>
 				<img class="logo-titulo" src="images/python-logo-transparent2.png" style="width: 70%;" alt="Python" />
@@ -41,13 +42,68 @@
 
 			<section id="um_bug">
 				<h1>Um bug!</h1>
-				<pre
-					class="fragment"><code class="hljs python center" data-trim>super.__new__(super).__get__(1)</code></pre>
-				<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
+				<pre class="fragment"><code class="hljs python center" data-trim>super.__new__(super).__get__(1)</code></pre>
+				<pre class="fragment"><code class="hljs python left" data-trim>>>> print(super(int, 1))</code></pre>
+				<pre class="fragment"><code class="hljs python left" data-trim>&lt;super: &lt;class 'int'&gt;, &lt;int object&gt;&gt;</code></pre>
+				<pre class="fragment"><code class="hljs python left" data-trim>>>> print(super.__new__(super))</code></pre>
+				<pre class="fragment"><code class="hljs python left" data-trim>&lt;super: &lt;class 'NULL'&gt;, NULL&gt;</code></pre>
+			</section>
+
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h2>Fluxo de um crash (exemplo)</h2>
+					</div>
+			            <pre class="fragment center_small">chamada falha e retorna NULL
+↓
+código não trata a falha corretamente
+↓
+execução continua com NULL
+↓</pre>
+					<h1 class="fragment">crash</h1>
+			</section>
+
+			<section id="desvendando_2">
+				<div style="height: 100%;">
+					<div>
+						<h2>Desvendando um crash</h2>
+					</div>
+					<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
 Program received signal SIGSEGV, Segmentation fault.
-supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
-at Objects/typeobject.c:12719
-12719                   type_or_instance, obj_str, type->tp_name);</code></pre>
+supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;) at Objects/typeobject.c:12719
+12719                   type_or_instance, obj_str, type->tp_name);
+#0  supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
+    at Objects/typeobject.c:12719
+#1  0x0000555555785116 in super_descr_get (self=self@entry=0x7ffff74f5fe0,
+    obj=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;, type=0x0)
+    at Objects/typeobject.c:12753
+#2  0x0000555555791f65 in wrap_descr_get (self=0x7ffff74f5fe0,
+    args=0x7ffff74921c0, wrapped=0x555555785070 &lt;super_descr_get&gt;)
+    at Objects/typeobject.c:10261
+</code></pre>
+					<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim data-line-numbers="|8|6|4|2">
+Program received signal SIGSEGV, Segmentation fault.
+...type->tp_name...
+
+#0  supercheck (type=0x0, ...)
+
+#1  super_descr_get (..., type=0x0)
+
+#2  wrap_descr_get (... &lt;super_descr_get&gt;)
+</code></pre>
+
+				</div>
+			</section>
+
+			<section>
+				<div style="height: 100%;">
+					<div>
+						<h1>Quebrando o Python</h1>
+					</div>
+				<h3 class="fragment">Diferentes implementações</h3>
+				<h3 class="fragment">CPython: escrita em C</h3>
+				<h3 class="fragment">Erros em C podem causar crash</h3>
+				<h3 class="fragment">Meus favoritos</h3>
 			</section>
 
 			<section>
@@ -144,52 +200,10 @@ def max_power(a, b):
 				</div>
 			</section>
 
-			<section id="desvendando">
-				<div style="height: 100%;">
-					<div>
-						<h2 id="desvendando_h2">Desvendando um crash</h2>
-					</div>
-					<pre
-						class="fragment"><code class="hljs python center" data-trim>super.__new__(super).__get__(1)</code></pre>
-					<pre class="fragment"><code class="hljs python" data-trim>
-Traceback (most recent call last):
-  File "&lt;string&gt;", line 1, in &lt;module&gt;
-TypeError: super(type, obj): obj must be an instance or subtype of type</code></pre>
-				</div>
-			</section>
-
-
-			<section id="desvendando_2">
-				<div style="height: 100%;">
-					<div>
-						<h2>Desvendando um crash</h2>
-					</div>
-					<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
-Program received signal SIGSEGV, Segmentation fault.
-#0  supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
-    at Objects/typeobject.c:12719
-#1  0x0000555555785116 in super_descr_get (self=self@entry=0x7ffff74f5fe0,
-    obj=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;, type=0x0)
-    at Objects/typeobject.c:12753
-#2  0x0000555555791f65 in wrap_descr_get (self=0x7ffff74f5fe0,
-    args=0x7ffff74921c0, wrapped=0x555555785070 &lt;super_descr_get&gt;)
-    at Objects/typeobject.c:10261
-#3  0x00005555556aa9d3 in _PyObject_MakeTpCall (
-    tstate=0x555555cc63a8 &lt;_PyRuntime+266456&gt;, callable=0x7ffff74f5c20,
-    args=0x7fffffffc2f8, nargs=1, keywords=0x0) at Objects/call.c:242
-#4  0x000055555582b599 in _Py_VectorCallInstrumentation_StackRefSteal (
-    callable=callable@entry=..., arguments=0x7ffff7fa9080,
-    total_args=total_args@entry=1, kwnames=kwnames@entry=...,
-    call_instrumentation=false, frame=frame@entry=0x7ffff7fa9020,
-    this_instr=0x7ffff7559ef2, tstate=0x555555cc63a8 &lt;_PyRuntime+266456&gt;)
-    at Python/ceval.c:791</code></pre>
-				</div>
-			</section>
-
 			<section>
 				<div style="height: 100%;">
 					<div>
-						<h2>Quebrando o Python</h2>
+						<h2>Quebrando o CPython</h2>
 					</div>
 					<pre class="fragment"><code class="hljs python" data-trim>
 class Silly:
@@ -209,7 +223,7 @@ next(generator())</code></pre>
 			<section>
 				<div style="height: 100%;">
 					<div>
-						<h2>Quebrando o Python</h2>
+						<h2>Quebrando o CPython</h2>
 					</div>
 					<div>
 						<pre class="fragment"><code class="hljs python" data-trim>
@@ -230,6 +244,7 @@ except TypeError:
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando implementações</h2>
+						<h3>RustPython</h3>
 					</div>
 					<div>
 						<pre class="fragment"><code class="hljs python" data-trim>
@@ -237,6 +252,7 @@ L = []
 L.append(L)
 list[L].__parameters__
 						</code></pre>
+						<h2 class="fragment">E CPython!</h2>
 					</div>
 				</div>
 			</section>
@@ -245,6 +261,7 @@ list[L].__parameters__
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando implementações</h2>
+						<h3>PyPy</h3>
 					</div>
 					<div>
 						<pre class="fragment"><code class="hljs python" data-trim>
@@ -262,9 +279,10 @@ list(z)
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando implementações</h2>
+						<h3>RustPython</h3>
 					</div>
 					<div>
-						<pre class="fragment"><code class="hljs python center" data-trim>
+						<pre class="fragment"><code class="hljs python" data-trim>
 import binascii
 
 binascii.b2a_qp(b'\n')
@@ -277,6 +295,7 @@ binascii.b2a_qp(b'\n')
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando extensões</h2>
+						<h3 class="fragment">NumPy</h3>
 					</div>
 					<div>
 						<pre class="fragment"><code class="hljs python" data-trim>
@@ -286,7 +305,6 @@ arr = np.array([1, 2, 3])
 arr.flags["é"] = True
 						</code></pre>
 					</div>
-
 				</div>
 			</section>
 
@@ -294,6 +312,7 @@ arr.flags["é"] = True
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando extensões</h2>
+						<h3>NumPy</h3>
 					</div>
 					<div>
 						<pre class="fragment"><code class="hljs python" data-trim>
@@ -310,6 +329,7 @@ numpy.float128().round(-2**31)
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando extensões</h2>
+						<h3>multidict</h3>
 					</div>
 					<div>
 						<pre class="fragment"><code class="hljs python" data-trim>
@@ -326,6 +346,7 @@ MultiDict().add(key="k")
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando extensões</h2>
+						<h3>multidict</h3>
 					</div>
 					<div>
 						<pre class="fragment"><code class="hljs python center" data-trim>
@@ -404,30 +425,16 @@ d.extend(d)
 				</div>
 			</section>
 
-
-            <section>
-                <h2>Fluxo de Evidência</h2>
-                <pre class="fragment">
-
-Achados candidatos
-        ↓
-Reproduzir + cruzar + deduplicar
-        ↓
-Evidência priorizada
-                </pre>
-            </section>
-
             <section>
                 <h2>Do achado à contribuição</h2>
-                <pre class="fragment">
-achado
-    ↓
+                <pre class="fragment center_small">achado
+↓
 reproducer
-    ↓
+↓
 deduplicação
-    ↓
+↓
 comunicação + validação
-    ↓
+↓
 correção</pre>
                 <h3 class="fragment">Respeito às pessoas mantenedoras</h3>
 			</section>

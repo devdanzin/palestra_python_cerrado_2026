@@ -30,6 +30,22 @@ Quem tiver um espírito aventureiro pode abrir um prompt de comando do Python e 
 
 Esse código em especial não é muito preocupante porque é extremamente artificial, a gente não vai esbarrar nesse crash num programa normal. Mas muitos outros exemplos podem acontecer e acontecem em código bem comportado, artesanal, em produção. Inclusive em código com impacto na segurança ou na estabilidade do sistema.
 
+## Desvendando um crash
+
+Deixa eu mostrar como a gente descobre o que deu errado quando ocorre um crash. Sabe quando ocorre uma exceção no nosso código Python e aparece a mensagem de erro, mostrando a linha com o problema e a sequência de linhas que levou até o problema? Aquilo é um traceback do código Python.
+
+```
+Slide com um traceback da chamada do super.__new__ em versão antiga.
+```
+
+Com um crash, podemos usar um debugger como o GDB e fazer a interrupção anormal da execução acontecer sob observação. Isso vai nos dar a linha onde o problema ocorreu e a sequência de linhas que levou até o problema. Isso é um backtrace do código nativo. Não parece simples de entender, né? Mas corresponde bonitinho a um traceback do Python, só que falando do código em C.
+
+```
+Slide com o backtrace do crash do super.__new__ em versão recente.
+```
+
+Também existem ferramentas específicas para esclarecer outros aspectos de um crash, como o AddressSanitizer que analisa o estado da memória de um programa, ou o faulthandler do CPython, que nos dá um traceback simplificado sem precisar de um debugger.
+
 ## Tipos de bug
 
 Quando a gente fala de bug, quase todo mundo tem alguma imagem mental do que seria isso. Por exemplo quando um software interativo para de responder corretamente: "tô clicando, mas tá bugado, não faz nada!". Ou a exibição fica com problemas gráficos: "í bugou!". Ou o software é encerrado inesperadamente: "fechou sozinho!". E por aí vai.
@@ -130,35 +146,23 @@ Mesmo bug não foi corrigido em código semelhante.
 ```
 
 
-## Desvendando um crash
-
-Deixa eu mostrar como a gente descobre o que deu errado quando ocorre um crash. Sabe quando ocorre uma exceção no nosso código Python e aparece a mensagem de erro, mostrando a linha com o problema e a sequência de linhas que levou até o problema? Aquilo é um traceback do código Python.
-
-```
-Slide com um traceback da chamada do super.__new__ em versão antiga.
-```
-
-Com um crash, podemos usar um debugger como o GDB e fazer a interrupção anormal da execução acontecer sob observação. Isso vai nos dar a linha onde o problema ocorreu e a sequência de linhas que levou até o problema. Isso é um backtrace do código nativo. Não parece simples de entender, né? Mas corresponde bonitinho a um traceback do Python, só que falando do código em C.
-
-```
-Slide com o backtrace do crash do super.__new__ em versão recente.
-```
-
-Também existem ferramentas específicas para esclarecer outros aspectos de um crash, como o AddressSanitizer que analisa o estado da memória de um programa, ou o faulthandler do CPython, que nos dá um traceback simplificado sem precisar de um debugger.
-
 ## Crashando o Python
 
 O Python é uma linguagem de programação que tem várias implementações, ou seja, vários softwares capazes de entender e rodar a linguagem Python, como o CPython, o PyPy e o RustPython.
 
 Quando falamos do Python ou do interpretador Python, quase sempre estamos falando do CPython, principal implementação. O CPython é um software com o cerne escrito na linguagem C, além de muito Python puro na biblioteca. E esse software, essa implementação, tem vários bugs conhecidos ou não. Ao contrário dos erros que ocorrem em código Python, que resultam em exceções, problemas no código C do CPython podem causar falhas de segmentação ou aborts, dois jeitos diferentes de um programa crashar.
 
+Um caminho comum para esses erros é:
+
+**uma chamada falha e retorna NULL → o código não trata corretamente a falha → execução continua com NULL → ocorre um crash**
+
 Pois é, é uma situação indesejada e rara, mas que acontece muito.
 
 Para evitar que esses problemas ocorram em produção, no pior momento, tentamos procurar os bugs preventivamente. Nas minhas campanhas, uso principalmente fuzzing e IA. O fusil é capaz de encontrar crashes em várias implementações de Python, enquanto o lafleur apenas no JIT do CPython. E temos os toolkits de IA já citados, que focam em implementações específicas: CPython, PyPy e RustPython.
 
-#### Outros exemplos de crashes no CPython
+### Exemplos de crashes no CPython
 
-##### `__iter__`
+#### `__iter__`
 
 Então vamos sair da teoria. Este foi um programa produzido a partir de uma campanha do fusil em cima do CPython.
 
@@ -175,9 +179,7 @@ next(generator())
 
 Esse código é estranho? É. Mas tem alguma coisa inválida aqui? Não. O `__iter__` é perfeitamente autorizado a levantar uma exceção. O que deveria acontecer? `RuntimeError`. O que aconteceu? **Crash**.
 
-
-
-##### `list.pop`
+#### `list.pop`
 
 Temos aqui um exemplo no qual o Python 3.13.2 crashava com código razoavelmente normal e bem comportado.
 ```python
@@ -196,11 +198,11 @@ Resultado: crash.
 
 Esse exemplo foi considerado bem sério, tanto é que virou release blocker. Isso significa que a próxima versão do Python não poderia ser lançada antes que o bug fosse corrigido.
 
-##### `_grouper_next`
+<!-- ##### `_grouper_next`
 
 Vamos ver um exemplo do tipo de erro que uma dessas ferramentas de IA encontra:
 
-<!-- O alvo da análise era o código por trás do `groupby`, uma ferramenta do módulo `itertools` do Python. Uma correção anterior protegeu referências em `groupby_next` antes de chamar código Python reentrante, por exemplo um dunder eq que avança o iterador.
+O alvo da análise era o código por trás do `groupby`, uma ferramenta do módulo `itertools` do Python. Uma correção anterior protegeu referências em `groupby_next` antes de chamar código Python reentrante, por exemplo um dunder eq que avança o iterador.
 
 O `cpython-review-toolkit` examinou o histórico e encontrou a mesma operação desprotegida na função irmã `_grouper_next`. Um `__eq__` malicioso podia reentrar no iterador, substituir e liberar uma chave ainda em uso, produzindo use-after-free e causando crash.
 
@@ -231,9 +233,9 @@ Não precisa entender esse código inteiro. Olhem só para isto: durante o `__eq
 Você corrige um bug numa função e esquece outra função parecida. Lembram quando eu falei nisso? Acontece de verdade.
 
 
-#### Quebrando implementações do Python (cerca 8 min, 4 bugs?)
+### Quebrando implementações do Python
 
-##### Lista recursiva no RustPython
+#### Lista recursiva no RustPython
 
 ```python
 L = []
@@ -246,7 +248,6 @@ Resultado: crash
 Este bug é interessante não porque seja sério ou um código normal, mas porque atingia duas implementações de Python: RustPython e CPython. Quando a gente acha um bug numa implementação diferente, o normal é comparar com o CPython pra ver qual é o comportamento esperado. Nesse caso, o CPython tinha o mesmo defeito!
 
 Também é interessante porque foi encontrado com IA e fuzzing de forma independente.
-
 
 ##### `zip_longest` no PyPy
 ```python
@@ -283,10 +284,6 @@ Como podemos ver o Rust fica um pouco confuso e procurando um índice de 18 quin
 Além do cerne do CPython, muitas extensões para o Python são baseadas em C e C++, como o NumPy e a Pillow. E a cada dia, ficam mais populares as extensões em Rust, como a Polars. São pacotes que contém código nativo, seja para melhor performance, fazer interface com bibliotecas em outras linguagens etc.
 
 Utilizando técnicas muito parecidas com as que são usadas para encontrar bugs nas implementações, podemos encontrar falhas de segmentação, pânicos, etc. nessas extensões.
-
-Um caminho comum para esses erros é:
-
-**uma chamada falha → o código não trata corretamente a falha → a extensão continua → ocorre um crash**
 
 
 #### Exemplos de crashes em extensões
