@@ -32,17 +32,20 @@
 				<h1>Quebrando o seu código e o</h1>
 				<img class="logo-titulo" src="images/python-logo-transparent2.png" style="width: 70%;" alt="Python" />
 				<h3>Daniel Diniz</h3>
-				<small>Criado com
-					<a href="https://github.com/hakimel/reveal.js/">reveal.js</a></small>
+
 			</section>
 
 			<section>
 				<h1>Introdução</h1>
+				<h2 class="fragment">Quem sou</h2>
+				<h2 class="fragment">O que faço</h2>
+				<h2 class="fragment">Onde estão os bugs</h2>
+				<h2 class="fragment">E quando os encontramos?</h2>
 			</section>
 
 			<section id="um_bug">
 				<h1>Um bug!</h1>
-				<pre class="fragment"><code class="hljs python center" data-trim>super.__new__(super).__get__(1)</code></pre>
+				<pre class="fragment"><code class="hljs python center_code" data-trim>super.__new__(super).__get__(1)</code></pre>
 				<pre class="fragment"><code class="hljs python left" data-trim>>>> print(super(int, 1))</code></pre>
 				<pre class="fragment"><code class="hljs python left" data-trim>&lt;super: &lt;class 'int'&gt;, &lt;int object&gt;&gt;</code></pre>
 				<pre class="fragment"><code class="hljs python left" data-trim>>>> print(super.__new__(super))</code></pre>
@@ -129,9 +132,7 @@ def max_power(a, b):
     else:
         result = a ** b
         if a &lt; 0 and b % 2 == 0:
-            result = abs(result)
-                    </code></pre>
-
+            result = abs(result)</code></pre>
 			</section>
 
 			<section>
@@ -167,7 +168,7 @@ def max_power(a, b):
 				<div style="height: 100%;">
 					<div>
 						<h1>Encontrando bugs</h1>
-						<h3 class="fragment">IA</h3>
+						<h3 class="fragment">IA: -review-toolkits</h3>
 					</div>
 					<div>
 						<ul class="fragment">
@@ -215,6 +216,8 @@ def generator():
 
 next(generator())</code></pre>
 					<div>
+						<h3 class="fragment">Esperado: <code>RuntimeError</code></h3>
+						<h3 class="fragment">Resultado: <code>Crash</code></h3>
 					</div>
 
 				</div>
@@ -236,6 +239,10 @@ try:
 except TypeError:
     raise</code></pre>
 					</div>
+					<div>
+						<h3 class="fragment">Esperado: <code>TypeError</code></h3>
+						<h3 class="fragment">Resultado: <code>Crash</code></h3>
+					</div>
 
 				</div>
 			</section>
@@ -254,6 +261,11 @@ list[L].__parameters__
 						</code></pre>
 						<h2 class="fragment">E CPython!</h2>
 					</div>
+					<div>
+						<h3 class="fragment">Esperado: <code>RecursionError</code></h3>
+						<h3 class="fragment">Resultado: <code>Crash</code></h3>
+					</div>
+
 				</div>
 			</section>
 
@@ -269,9 +281,14 @@ import itertools
 
 z = itertools.zip_longest([], [1, 2, 3])
 next(z)
-list(z)
+print(list(z))
 						</code></pre>
 					</div>
+					<div>
+						<h3 class="fragment">Esperado: [(None, 2), (None, 3)]</h3>
+						<h3 class="fragment">Resultado: <code>Crash</code></h3>
+					</div>
+
 				</div>
 			</section>
 
@@ -288,6 +305,12 @@ import binascii
 binascii.b2a_qp(b'\n')
 						</code></pre>
 					</div>
+					<div>
+						<h3 class="fragment">Esperado: <code>b'\n'</code></h3>
+						<h3 class="fragment">Resultado: <code>Pânico!</code></h3>
+						  <code class="fragment">index out of bounds: the len is 1 but the index is <b>18446744073709551615</b></code>
+					</div>
+
 				</div>
 			</section>
 
@@ -305,6 +328,11 @@ arr = np.array([1, 2, 3])
 arr.flags["é"] = True
 						</code></pre>
 					</div>
+					<div>
+						<h3 class="fragment">Esperado: KeyError: 'Unknown flag'</h3>
+						<h3 class="fragment">Resultado: <code>Crash</code></h3>
+					</div>
+
 				</div>
 			</section>
 
@@ -321,6 +349,10 @@ import numpy
 numpy.float128().round(-2**31)
 						</code></pre>
 					</div>
+					<div>
+						<h3 class="fragment">Esperado: <code>float ou ValueError</code></h3>
+						<h3 class="fragment">Resultado: <code>Crash</code></h3>
+					</div>
 
 				</div>
 			</section>
@@ -335,8 +367,12 @@ numpy.float128().round(-2**31)
 						<pre class="fragment"><code class="hljs python" data-trim>
 from multidict import MultiDict
 
-MultiDict().add(key="k") 
+MultiDict().add(key="k")
 						</code></pre>
+					</div>
+					<div>
+						<h3 class="fragment">Esperado: TypeError (falta "value")</h3>
+						<h3 class="fragment">Resultado: <code>Crash</code></h3>
 					</div>
 
 				</div>
@@ -349,13 +385,17 @@ MultiDict().add(key="k")
 						<h3>multidict</h3>
 					</div>
 					<div>
-						<pre class="fragment"><code class="hljs python center" data-trim>
+						<pre class="fragment"><code class="hljs python" data-trim>
 from multidict import MultiDict
 
 lista_de_tuples = [(f"k{i}", i) for i in range(64)]
 d = MultiDict(lista_de_tuples)
-d.extend(d) 
+d.extend(d)
 						</code></pre>
+					<div>
+						<h3 class="fragment">Esperado: TypeError (falta "value")</h3>
+						<h3 class="fragment">Resultado: <code>Crash</code></h3>
+					</div>
 					</div>
 
 				</div>
@@ -365,14 +405,21 @@ d.extend(d)
 				<div style="height: 100%;">
 					<div>
 						<h2>Bugs em Python puro</h2>
+						<h3 class="fragment">IDLE</h3>
 					</div>
 					<div>
-						<pre class="fragment"><code class="hljs python" data-trim>
+						<pre class="fragment wider"><code class="hljs python" data-trim>from idlelib.format import get_comment_header, reformat_comment
+src = '''
+# Comentário
+result = compute(a)
+'''
 
-						</code></pre>
-
+print(repr(reformat_comment(src, 72, get_comment_header(src))))</code></pre>
 					</div>
-
+					<div>
+						<h3 class="fragment">Esperado: <code>result = compute(a)</code></h3>
+						<h3 class="fragment">Resultado: <code>esult = compute(a)</code></h3>
+					</div>
 				</div>
 			</section>
 
@@ -381,8 +428,18 @@ d.extend(d)
 				<div style="height: 100%;">
 					<div>
 						<h2>Bugs em Python puro</h2>
+						<h3>coveragepy</h3>
+					</div>
+					<div><pre class="fragment wider"><code class="hljs python" data-trim>
+from coverage.results import display_covered, should_fail_under
+
+deve_falhar = should_fail_under(99.87, 99.9, 0)
+
+print(deve_falhar)</code></pre>
 					</div>
 					<div>
+						<h3 class="fragment">Esperado: <code>True</code></h3>
+						<h3 class="fragment">Resultado: <code>False</code></h3>
 					</div>
 
 				</div>
@@ -392,8 +449,20 @@ d.extend(d)
 				<div style="height: 100%;">
 					<div>
 						<h2>Bugs no seu código</h2>
+						<h3>aiohttp</h3>
 					</div>
 					<div>
+						<pre class="fragment wider"><code class="hljs python" data-trim>import aiohttp
+
+print(aiohttp.encode_basic_auth("user", "pass"))
+
+print(aiohttp.encode_basic_auth("user", "pass", encoding="utf-16"))</code></pre>
+					<div>
+						<h3 class="fragment">Esperado: <code class="smaller_code">Basic dXNlcjpwYXNz</code></h3>
+						<h4 class="fragment">Resultado: <code class="smaller_code">Basic ⼯ㄵ䡁䅍党祂䑁䅯䅣桂䡁䅍督㵁</code></h4>
+					</div>
+					<code class="fragment">O Partido trabalha, Deus fiscaliza o loureiro.</code>
+
 					</div>
 
 				</div>
@@ -403,8 +472,19 @@ d.extend(d)
 				<div style="height: 100%;">
 					<div>
 						<h2>Bugs no seu código</h2>
+						<h3>pavedb</h3>
 					</div>
-					<div>
+					<div><pre class="fragment wider"><code class="hljs python" data-trim>from pvh import app
+from fastapi.testclient import TestClient
+
+body = b"x" * (40 * 1024 * 1024)  # 40 MB
+
+a = app(server__max_request_body_mb="16MB")
+r = TestClient(a).post("/v1/collections/acme/books", content=body)
+print(r.status_code)
+</code></pre>
+						<h3 class="fragment">Esperado: <code class="smaller_code">413 -> Rejeitado</code></h3>
+						<h3 class="fragment">Resultado: <code class="smaller_code">422 -> Aceito</code></h3>
 					</div>
 
 				</div>
@@ -414,7 +494,6 @@ d.extend(d)
 				<div style="height: 100%;">
 					<div>
 						<h2>Lições importantes</h2>
-						<br />
 						<br />
 					</div>
 					<div>
@@ -442,9 +521,13 @@ correção</pre>
 			<section>
 				<div style="height: 100%;">
 					<div>
-						<h2>Conclusão</h2>
+						<h1>Conclusão</h1>
 					</div>
 					<div>
+						<h2 class="fragment">Onde estão os bugs</h2>
+						<h2 class="fragment">Como encontrá-los?</h2>
+						<h2 class="fragment">E quando os encontramos?</h2>
+						<h1 class="fragment">Um convite</h1>
 					</div>
 				</div>
 			</section>
@@ -462,7 +545,7 @@ correção</pre>
 						<span>https://t.me/devdanzin</span>
 					</p>
 					<p>
-						<img class="contato-icone" src="images/github.png" alt="" />
+						<img class="contato-icone" src="images/github_dark.png" alt="" />
 						<span>https://github.com/devdanzin</span>
 					</p>
 					<p>

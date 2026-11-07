@@ -366,6 +366,11 @@ section.has-light-background h6 {
     left: -25% !important;
 }
 
+.wider {
+    width: 120% !important;
+    left: -10% !important;
+}
+
 .center_small {
     line-height: 110% !important;
     padding: 10px !important;
@@ -382,13 +387,15 @@ section.has-light-background h6 {
 
 #um_bug pre code.center,
 #desvendando div pre code.center,
-#binascii {
+#binascii,
+.center_code {
     text-align: center !important;
 }
 
 #um_bug pre code.center, 
 #desvendando div pre code.center,
-#binascii div div pre code.center {
+#binascii div div pre code.center,
+.center_code  {
     line-height: 120% !important;
     padding: 70px !important;
     font-size: 250% !important;
