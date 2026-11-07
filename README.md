@@ -1,6 +1,8 @@
 # palestra_python_cerrado_2026
 
-Repositório privativo para desenvolvimento da palestra ["Quebrando o seu código e o Python"](https://pythoncerrado.org/2026/grade/20261107/quebrando-o-seu-codigo-e-o-python-JZP83A), apresentada na Python Cerrado 2026 (7 de novembro de 2026).
+Repositório da palestra ["Quebrando o seu código e o Python"](https://pythoncerrado.org/2026/grade/20261107/quebrando-o-seu-codigo-e-o-python-JZP83A), apresentada na Python Cerrado 2026 (7 de novembro de 2026).
+
+**Slides:** https://devdanzin.github.io/palestra_python_cerrado_2026/ (tema claro: https://devdanzin.github.io/palestra_python_cerrado_2026/?tema=claro)
 
 ## Conteúdo
 
@@ -20,3 +22,5 @@ npm start     # http://localhost:8000/cerrado.html
 Para usar outra porta: `npm start -- --port 9000`.
 
 O deck tem dois temas. O escuro é o padrão; o claro é ativado pela URL: http://localhost:8000/cerrado.html?tema=claro. As cores do tema claro ficam em `apresentacao/dist/theme/claro.css`.
+
+A cada push em `main` que altere `apresentacao/`, o workflow `.github/workflows/pages.yml` publica o deck no GitHub Pages, com `cerrado.html` servido como página inicial.
