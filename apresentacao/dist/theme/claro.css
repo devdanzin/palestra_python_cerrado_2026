@@ -27,15 +27,10 @@ html.tema-claro .reveal blockquote {
     background: #0000000d;
 }
 
-/* O tema github do highlight.js usa fundo branco puro; um cinza leve
-   mantém o bloco de código visível sobre o slide branco.
-   Ele também define "pre code.hljs { padding: 1em }", que vence o
-   "padding: 5px" de .reveal pre code em black.css (mesma especificidade,
-   carregado depois) e deixa os blocos mais altos que no tema escuro, onde
-   o monokai perde para black.css. Repetimos os 5px para o layout ser igual. */
+/* Mantém fundo distinto e o mesmo espaçamento interno do tema escuro. */
 html.tema-claro .reveal pre code.hljs {
     background: #f4f4f4;
-    padding: 5px;
+    padding: 16px 24px;
 }
 
 /* Bloco de contato: fundo claro com o QR code (módulos pretos sobre branco). */

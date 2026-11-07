@@ -26,7 +26,10 @@
 		// Tema claro: cerrado.html?tema=claro (as cores estão em dist/theme/claro.css).
 		if (new URLSearchParams(location.search).get('tema') === 'claro') {
 			document.documentElement.classList.add('tema-claro');
-			document.getElementById('tema-codigo').href = 'dist/plugin/highlight/github.css';
+			// Resolve o CSS no mesmo endereço da página, tanto por HTTP quanto por file://.
+			document.getElementById('tema-codigo').href = new URL(
+				'dist/plugin/highlight/github.css', location.href
+			).href;
 		}
 	</script>
 </head>
@@ -55,10 +58,15 @@
 			<section id="um_bug">
 				<h1>Um bug!</h1>
 				<pre class="fragment"><code class="hljs python center_code" data-trim>super.__new__(super).__get__(1)</code></pre>
-				<pre class="fragment"><code class="hljs python left" data-trim>>>> print(super(int, 1))</code></pre>
-				<pre class="fragment"><code class="hljs python left" data-trim>&lt;super: &lt;class 'int'&gt;, &lt;int object&gt;&gt;</code></pre>
-				<pre class="fragment"><code class="hljs python left" data-trim>>>> print(super.__new__(super))</code></pre>
-				<pre class="fragment"><code class="hljs python left" data-trim>&lt;super: &lt;class 'NULL'&gt;, NULL&gt;</code></pre>
+			</section>
+
+			<section id="um_bug_detalhes">
+				<h2>Um bug?</h2>
+				<pre class="reproducer"><code class="hljs python" data-trim>super.__new__(super).__get__(1)</code></pre>
+				<pre class="fragment"><code class="hljs python" data-trim>>>> print(super(int, 1))
+&lt;super: &lt;class 'int'&gt;, &lt;int object&gt;&gt;</code></pre>
+				<pre class="fragment"><code class="hljs python" data-trim>>>> print(super.__new__(super))
+&lt;super: &lt;class 'NULL'&gt;, NULL&gt;</code></pre>
 			</section>
 
 			<section>
@@ -75,26 +83,28 @@ execução continua com NULL
 					<h1 class="fragment">crash</h1>
 			</section>
 
-			<section id="desvendando_2">
-				<div style="height: 100%;">
-					<div>
-						<h3>Desvendando um crash</h3>
-					</div>
-					<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim>
+			<section id="desvendando">
+				<h2>Desvendando um crash (trecho)</h2>
+				<pre class="fragment"><code class="hljs plaintext" data-trim>
 Program received signal SIGSEGV, Segmentation fault.
-supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
+supercheck (type=0x0,
+    obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
 at Objects/typeobject.c:12719
-12719                   type_or_instance, obj_str, type->tp_name);
-#0  supercheck (type=0x0, obj=obj@entry=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;)
+12719    type_or_instance, obj_str, type->tp_name);
+#0  supercheck (type=0x0, obj=0x555555c8c9a0)
     at Objects/typeobject.c:12719
-#1  0x0000555555785116 in super_descr_get (self=self@entry=0x7ffff74f5fe0,
+#1  super_descr_get (self=0x7ffff74f5fe0,
     obj=0x555555c8c9a0 &lt;_PyRuntime+30416&gt;, type=0x0)
     at Objects/typeobject.c:12753
-#2  0x0000555555791f65 in wrap_descr_get (self=0x7ffff74f5fe0,
-    args=0x7ffff74921c0, wrapped=0x555555785070 &lt;super_descr_get&gt;)
+#2  wrap_descr_get (self=0x7ffff74f5fe0,
+    args=0x7ffff74921c0, wrapped=super_descr_get)
     at Objects/typeobject.c:10261
 </code></pre>
-					<pre class="fragment"><code class="hljs plaintext smaller_code" data-trim data-line-numbers="|8|6|4|2">
+			</section>
+
+			<section id="desvendando_2">
+				<h2>Seguindo o NULL</h2>
+				<pre class="fragment"><code class="hljs plaintext" data-trim data-line-numbers="|8|6|4|2">
 Program received signal SIGSEGV, Segmentation fault.
 ...type->tp_name...
 
@@ -104,8 +114,6 @@ Program received signal SIGSEGV, Segmentation fault.
 
 #2  wrap_descr_get (... &lt;super_descr_get&gt;)
 </code></pre>
-
-				</div>
 			</section>
 
 			<section>
@@ -129,11 +137,11 @@ Program received signal SIGSEGV, Segmentation fault.
 			</section>
 
 			<section>
-				<h1>Encontrando bugs</h1>
+				<h2>Encontrando bugs</h2>
 				<h3 class="fragment">Revisão manual</h3>
 				<pre id="max_power_pre"><code id="max_power" class="hljs python fragment" data-trim data-line-numbers="|7|7,11">
 def max_power(a, b):
-    """Maior número na exponenciação de um par."""
+    """Maior potência de um par."""
     if a &gt; b:
         result = b ** a
         if b &lt; 0 and a % 2 == 0:
@@ -145,25 +153,23 @@ def max_power(a, b):
             result = abs(result)</code></pre>
 			</section>
 
-			<section>
+			<section class="slide-diagrama">
 				<div style="height: 100%;">
 					<div>
-						<h1>Encontrando bugs</h1>
-						<h3 class="fragment">Análise estática</h3>
+						<h2>Análise estática</h2>
 					</div>
 					<div>
-						<img class="fragment" src="images/Analise_Estatica_Codigo_Python.png "
+						<img class="fragment" src="images/Analise_Estatica_Codigo_Python.png"
 							alt="Análise Estática Código Python" />
 					</div>
 
 				</div>
 			</section>
 
-			<section>
+			<section class="slide-diagrama">
 				<div style="height: 100%;">
 					<div>
-						<h1>Encontrando bugs</h1>
-						<h3 class="fragment">Fuzzing</h3>
+						<h2>Fuzzing</h2>
 					</div>
 					<div>
 						<img class="fragment" src="images/Fuzzing_Aleatoriedade_e_Feedback.png"
@@ -197,21 +203,20 @@ def max_power(a, b):
 			</section>
 
 
-			<section data-transition="convex">
+			<section class="slide-diagrama" data-transition="convex">
 				<div style="height: 100%;">
 					<div>
-						<h1>Encontrando bugs</h1>
-						<h3>IA</h3>
+						<h2>IA: encontrando código semelhante</h2>
 					</div>
 					<div>
 						<img class="fragment" src="images/IA_encontra_codigo_semelhante.png"
-							alt="IA encontra código semelhante" style="padding: 10px;" />
+							alt="IA encontra código semelhante" />
 					</div>
 
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-ampliado">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando o CPython</h2>
@@ -233,7 +238,7 @@ next(generator())</code></pre>
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-ampliado">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando o CPython</h2>
@@ -257,7 +262,7 @@ except TypeError:
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-maior">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando implementações</h2>
@@ -279,7 +284,7 @@ list[L].__parameters__
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-maior">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando implementações</h2>
@@ -302,7 +307,7 @@ print(list(z))
 				</div>
 			</section>
 
-			<section id="binascii">
+			<section class="codigo-maior" id="binascii">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando implementações</h2>
@@ -324,7 +329,7 @@ binascii.b2a_qp(b'\n')
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-maior">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando extensões</h2>
@@ -346,7 +351,7 @@ arr.flags["é"] = True
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-maior">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando extensões</h2>
@@ -367,7 +372,7 @@ numpy.float128().round(-2**31)
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-maior">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando extensões</h2>
@@ -388,7 +393,7 @@ MultiDict().add(key="k")
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-ampliado">
 				<div style="height: 100%;">
 					<div>
 						<h2>Quebrando extensões</h2>
@@ -398,7 +403,9 @@ MultiDict().add(key="k")
 						<pre class="fragment"><code class="hljs python" data-trim>
 from multidict import MultiDict
 
-lista_de_tuples = [(f"k{i}", i) for i in range(64)]
+lista_de_tuples = [
+    (f"k{i}", i) for i in range(64)
+]
 d = MultiDict(lista_de_tuples)
 d.extend(d)
 						</code></pre>
@@ -411,37 +418,40 @@ d.extend(d)
 				</div>
 			</section>
 
-			<section>
-				<div style="height: 100%;">
-					<div>
-						<h2>Bugs em Python puro</h2>
-						<h3 class="fragment">IDLE</h3>
-					</div>
-					<div>
-						<pre class="fragment wider"><code class="hljs python" data-trim>from idlelib.format import get_comment_header, reformat_comment
+			<section id="idle">
+				<h2>Bugs em Python puro</h2>
+				<h3>IDLE</h3>
+				<pre class="fragment"><code class="hljs python" data-trim>from idlelib.format import (
+    get_comment_header, reformat_comment,
+)
 src = '''
 # Comentário
 result = compute(a)
 '''
 
-print(repr(reformat_comment(src, 72, get_comment_header(src))))</code></pre>
-					</div>
-					<div>
-						<h3 class="fragment">Esperado: <code>result = compute(a)</code></h3>
-						<h3 class="fragment">Resultado: <code>esult = compute(a)</code></h3>
-					</div>
-				</div>
+header = get_comment_header(src)
+print(repr(reformat_comment(src, 72, header)))</code></pre>
+			</section>
+
+			<section class="codigo-maior" id="idle_resultado">
+				<h2>IDLE: resultado</h2>
+				<pre class="reproducer"><code class="hljs python" data-trim>src = '''
+# Comentário
+result = compute(a)
+'''</code></pre>
+				<h3 class="fragment">Esperado: <code>result = compute(a)</code></h3>
+				<h3 class="fragment">Resultado: <code>esult = compute(a)</code></h3>
 			</section>
 
 
-			<section>
+			<section id="coverage">
 				<div style="height: 100%;">
 					<div>
 						<h2>Bugs em Python puro</h2>
 						<h3>coverage.py</h3>
 					</div>
-					<div><pre class="fragment wider"><code class="hljs python" data-trim>
-from coverage.results import display_covered, should_fail_under
+					<div><pre class="fragment"><code class="hljs python" data-trim>
+from coverage.results import should_fail_under
 
 deve_falhar = should_fail_under(99.87, 99.9, 0)
 
@@ -455,18 +465,18 @@ print(deve_falhar)</code></pre>
 				</div>
 			</section>
 
-			<section>
+			<section class="codigo-ampliado">
 				<div style="height: 100%;">
 					<div>
 						<h2>Bugs no seu código</h2>
 						<h3>aiohttp</h3>
 					</div>
 					<div>
-						<pre class="fragment wider"><code class="hljs python" data-trim>import aiohttp
-
+						<pre class="fragment"><code class="hljs python" data-trim>import aiohttp
 print(aiohttp.encode_basic_auth("user", "pass"))
-
-print(aiohttp.encode_basic_auth("user", "pass", encoding="utf-16"))</code></pre>
+print(aiohttp.encode_basic_auth(
+    "user", "pass", encoding="utf-16"
+))</code></pre>
 					<div>
 						<h3 class="fragment">Esperado: <code class="smaller_code">Basic dXNlcjpwYXNz</code></h3>
 						<h4 class="fragment">Resultado: <code class="smaller_code">Basic ⼯ㄵ䡁䅍党祂䑁䅯䅣桂䡁䅍督㵁</code></h4>
@@ -478,26 +488,28 @@ print(aiohttp.encode_basic_auth("user", "pass", encoding="utf-16"))</code></pre>
 				</div>
 			</section>
 
-			<section>
-				<div style="height: 100%;">
-					<div>
-						<h2>Bugs no seu código</h2>
-						<h3>pavedb</h3>
-					</div>
-					<div><pre class="fragment wider"><code class="hljs python" data-trim>from pvh import app
+			<section id="pavedb">
+				<h2>Bugs no seu código</h2>
+				<h3>pavedb</h3>
+				<pre class="fragment"><code class="hljs python" data-trim>from pvh import app
 from fastapi.testclient import TestClient
 
 body = b"x" * (40 * 1024 * 1024)  # 40 MB
 
 a = app(server__max_request_body_mb="16MB")
-r = TestClient(a).post("/v1/collections/acme/books", content=body)
+r = TestClient(a).post(
+    "/v1/collections/acme/books", content=body
+)
 print(r.status_code)
 </code></pre>
-						<h3 class="fragment">Esperado: <code class="smaller_code">413 -> Rejeitado</code></h3>
-						<h3 class="fragment">Resultado: 422 -> Passou do limite</h3>
-					</div>
+			</section>
 
-				</div>
+			<section class="codigo-ampliado" id="pavedb_resultado">
+				<h2>pavedb: resultado</h2>
+				<pre class="reproducer"><code class="hljs python" data-trim>body = b"x" * (40 * 1024 * 1024)  # 40 MB
+a = app(server__max_request_body_mb="16MB")</code></pre>
+				<h3 class="fragment">Esperado: <code class="smaller_code">413 -> Rejeitado</code></h3>
+				<h3 class="fragment">Resultado: 422 -> Passou do limite</h3>
 			</section>
 
 			<section>
@@ -589,6 +601,10 @@ correção</pre>
 		// import RevealHighlight from 'reveal.js/plugin/highlight';
 
 		Reveal.initialize({
+			// Área 16:9 com pelo menos 6% de respiro em cada borda.
+			width: 1280,
+			height: 720,
+			margin: 0.12,
 			controls: true,
 			progress: true,
 			center: true,
