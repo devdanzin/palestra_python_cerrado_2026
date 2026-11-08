@@ -46,6 +46,21 @@ Slide com o backtrace do crash do super.__new__ em versão recente.
 
 Também existem ferramentas específicas para esclarecer outros aspectos de um crash, como o AddressSanitizer que analisa o estado da memória de um programa, ou o faulthandler do CPython, que nos dá um traceback simplificado sem precisar de um debugger.
 
+## Crashando o Python
+
+O Python é uma linguagem de programação que tem várias implementações, ou seja, vários softwares capazes de entender e rodar a linguagem Python, como o CPython, o PyPy e o RustPython.
+
+Quando falamos do Python ou do interpretador Python, quase sempre estamos falando do CPython, principal implementação. O CPython é um software com o cerne escrito na linguagem C, além de muito Python puro na biblioteca. E esse software, essa implementação, tem vários bugs conhecidos ou não. Ao contrário dos erros que ocorrem em código Python, que resultam em exceções, problemas no código C do CPython podem causar falhas de segmentação ou aborts, dois jeitos diferentes de um programa crashar.
+
+Um caminho comum para esses erros é:
+
+**chamada falha e retorna NULL → código não trata a falha corretamente → execução continua com NULL → crash**
+
+Pois é, é uma situação indesejada e rara, mas que acontece muito.
+
+Para evitar que esses problemas ocorram em produção, no pior momento, tentamos procurar os bugs preventivamente. Nas minhas campanhas, uso principalmente fuzzing e IA. O fusil é capaz de encontrar crashes em várias implementações de Python, enquanto o lafleur apenas no JIT do CPython. E temos os toolkits de IA já citados, que focam em implementações específicas: CPython, PyPy e RustPython.
+
+
 ## Tipos de bug
 
 Quando a gente fala de bug, quase todo mundo tem alguma imagem mental do que seria isso. Por exemplo quando um software interativo para de responder corretamente: "tô clicando, mas tá bugado, não faz nada!". Ou a exibição fica com problemas gráficos: "í bugou!". Ou o software é encerrado inesperadamente: "fechou sozinho!". E por aí vai.
@@ -146,19 +161,6 @@ Mesmo bug não foi corrigido em código semelhante.
 ```
 
 
-## Crashando o Python
-
-O Python é uma linguagem de programação que tem várias implementações, ou seja, vários softwares capazes de entender e rodar a linguagem Python, como o CPython, o PyPy e o RustPython.
-
-Quando falamos do Python ou do interpretador Python, quase sempre estamos falando do CPython, principal implementação. O CPython é um software com o cerne escrito na linguagem C, além de muito Python puro na biblioteca. E esse software, essa implementação, tem vários bugs conhecidos ou não. Ao contrário dos erros que ocorrem em código Python, que resultam em exceções, problemas no código C do CPython podem causar falhas de segmentação ou aborts, dois jeitos diferentes de um programa crashar.
-
-Um caminho comum para esses erros é:
-
-**uma chamada falha e retorna NULL → o código não trata corretamente a falha → execução continua com NULL → ocorre um crash**
-
-Pois é, é uma situação indesejada e rara, mas que acontece muito.
-
-Para evitar que esses problemas ocorram em produção, no pior momento, tentamos procurar os bugs preventivamente. Nas minhas campanhas, uso principalmente fuzzing e IA. O fusil é capaz de encontrar crashes em várias implementações de Python, enquanto o lafleur apenas no JIT do CPython. E temos os toolkits de IA já citados, que focam em implementações específicas: CPython, PyPy e RustPython.
 
 ### Exemplos de crashes no CPython
 
